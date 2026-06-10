@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>海豚交友系統 · 互動 Demo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --ink:#1a3a5c; --ink-soft:#3a6080; --ink-faint:#7a9ab8;
+      --paper:#f0f8ff; --paper2:#dff0fa;
+      --teal:#3a9ec8; --teal-light:#d0edf8; --teal-mid:#5ab8d8;
+      --purple:#8b7cc8; --purple-light:#e8e4f8;
+      --amber:#d4954a; --amber-light:#fde8cc;
+      --coral:#d0706a; --coral-light:#fde2de;
+      --blue:#4a8cc0; --blue-light:#d8edf8;
+      --r:12px; --shadow:0 2px 16px rgba(26,24,20,0.08);
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Noto Sans TC',sans-serif;background:var(--paper);color:var(--ink);height:100vh;overflow:hidden;display:flex;flex-direction:column;}
+
+    /* ── HEADER ── */
+    .app-header{height:56px;background:rgba(250,248,244,0.96);backdrop-filter:blur(12px);border-bottom:1px solid rgba(26,24,20,0.1);display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0;z-index:10;}
+    .btn-back{width:36px;height:36px;border:none;background:var(--paper2);border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--ink-soft);transition:all .2s;flex-shrink:0;}
+    .btn-back:hover{background:var(--teal-light);color:var(--teal);}
+    .btn-back.hidden{visibility:hidden;}
+    .header-title{font-size:14px;font-weight:500;color:var(--ink-soft);flex:1;}
+    .header-badge{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500;}
+    .badge-user{background:var(--teal-light);color:var(--teal);}
+    .badge-teacher{background:var(--purple-light);color:var(--purple);}
+    .badge-companion{background:var(--amber-light);color:var(--amber);}
+    .badge-hidden{display:none;}
+
+    /* ── SCREEN SYSTEM ── */
+    .screen-wrap{flex:1;overflow:hidden;position:relative;}
+    .screen{position:absolute;inset:0;overflow-y:auto;padding:28px 22px 40px;transition:transform .38s cubic-bezier(.4,0,.2,1),opacity .38s;}
+    .screen.active{transform:translateX(0);opacity:1;pointer-events:all;}
+    .screen.offLeft{transform:translateX(-100%);opacity:0;pointer-events:none;}
+    .screen.offRight{transform:translateX(100%);opacity:0;pointer-events:none;}
+
+    /* ── SPLASH ── */
+    #s-splash{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:linear-gradient(160deg,#1a6898 0%,#3a9ec8 55%,#72c0e0 100%);}
+    .splash-dolphin{font-size:80px;animation:float 3s ease-in-out infinite;margin-bottom:20px;}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+    .splash-title{font-family:'Noto Serif TC',serif;font-size:26px;font-weight:700;color:white;line-height:1.3;margin-bottom:10px;}
+    .splash-sub{font-size:13px;color:rgba(255,255,255,.72);line-height:1.8;max-width:280px;margin-bottom:40px;}
+    .btn-start{padding:14px 40px;background:white;color:var(--teal);border:none;border-radius:50px;font-size:15px;font-weight:700;font-family:'Noto Sans TC',sans-serif;cursor:pointer;box-shadow:0 6px 24px rgba(0,0,0,.2);transition:all .2s;}
+    .btn-start:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.25);}
+    .splash-chips{margin-top:28px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+    .splash-chip{font-size:11px;padding:4px 12px;border-radius:20px;background:rgba(255,255,255,.14);color:rgba(255,255,255,.88);}
+
+    /* ── ROLE ── */
+    .page-heading{font-family:'Noto Serif TC',serif;font-size:22px;font-weight:700;margin-bottom:6px;}
+    .page-sub{font-size:13px;color:var(--ink-faint);margin-bottom:24px;}
+    .role-cards{display:flex;flex-direction:column;gap:14px;}
+    .role-card{padding:20px;border-radius:var(--r);border:2px solid rgba(26,24,20,.1);cursor:pointer;transition:all .25s;display:flex;gap:16px;align-items:flex-start;background:white;}
+    .role-card:hover.rc-user{border-color:var(--teal);box-shadow:var(--shadow);transform:translateY(-2px);}
+    .role-card:hover.rc-companion{border-color:var(--amber);box-shadow:var(--shadow);transform:translateY(-2px);}
+    .role-card:hover.rc-teacher{border-color:var(--purple);box-shadow:var(--shadow);transform:translateY(-2px);}
+    .role-icon{font-size:36px;flex-shrink:0;}
+    .role-title{font-size:15px;font-weight:700;margin-bottom:4px;}
+    .role-desc{font-size:12px;color:var(--ink-faint);line-height:1.7;}
+    .role-feats{margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;}
+    .ft{font-size:10px;padding:2px 8px;border-radius:10px;background:var(--teal-light);color:var(--teal);}
+    .ft.a{background:var(--amber-light);color:var(--amber);}
+    .ft.p{background:var(--purple-light);color:var(--purple);}
+
+    /* ── HOME (USER MAIN) ── */
+    #s-home{padding:0;overflow:hidden;}
+    .home-tabs{position:absolute;inset:0;display:flex;flex-direction:column;}
+    .tab-content{flex:1;overflow-y:auto;display:none;}
+    .tab-content.active{display:block;}
+    .bottom-nav{height:60px;background:white;border-top:1px solid rgba(26,24,20,.08);display:flex;flex-shrink:0;}
+    .bnav-btn{flex:1;border:none;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:10px;color:var(--ink-faint);font-family:'Noto Sans TC',sans-serif;transition:all .2s;}
+    .bnav-btn.on{color:var(--teal);}
+    .bnav-btn span:first-child{font-size:20px;}
+
+    /* ── OCEAN MAP ── */
+    .ocean-header{padding:16px 20px 12px;display:flex;align-items:center;justify-content:space-between;}
+    .ocean-greeting{font-size:16px;font-weight:700;}
+    .coin-bar{display:flex;gap:10px;}
+    .coin-pill{font-size:11px;padding:4px 10px;border-radius:20px;background:var(--amber-light);color:var(--amber);font-weight:600;}
+    .coin-pill.star{background:var(--blue-light);color:var(--blue);}
+    .ocean-bg{background:linear-gradient(180deg,#c5e8f5 0%,#8ecfe8 50%,#5db8cc 100%);padding:16px 20px 28px;position:relative;overflow:hidden;}
+    .ocean-prompt{font-size:12px;color:rgba(255,255,255,.85);text-align:center;margin-bottom:16px;font-weight:500;}
+    .islands-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+    .islands-grid .span2{grid-column:1/-1;display:flex;justify-content:center;}
+    .islands-grid .span2 .island-card{width:calc(50% - 6px);}
+    .island-card{background:white;border-radius:16px;padding:16px 14px;cursor:pointer;transition:all .25s;box-shadow:0 4px 16px rgba(0,80,130,.10);border:2px solid transparent;text-align:center;animation:bobble 4s ease-in-out infinite;}
+    .island-card:nth-child(2){animation-delay:.8s;}
+    .island-card:nth-child(3){animation-delay:1.5s;}
+    .island-card:nth-child(4){animation-delay:.4s;}
+    .island-card:nth-child(5){animation-delay:1.2s;}
+    @keyframes bobble{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+    .island-card:hover{transform:translateY(-6px) scale(1.02);box-shadow:0 8px 24px rgba(0,80,130,.16);}
+    .island-emoji{font-size:32px;margin-bottom:6px;}
+    .island-name{font-size:13px;font-weight:700;margin-bottom:3px;}
+    .island-desc{font-size:10px;color:var(--ink-faint);line-height:1.5;}
+    .island-tag{display:inline-block;margin-top:7px;font-size:10px;padding:2px 8px;border-radius:10px;}
+    .wave-deco{margin-top:16px;text-align:center;font-size:10px;color:rgba(255,255,255,.7);}
+
+    /* ── MATCHING ── */
+    .match-wrap{padding:24px 20px;}
+    .match-searching{display:flex;flex-direction:column;align-items:center;padding:40px 20px;text-align:center;}
+    .pulse-ring{width:80px;height:80px;border-radius:50%;background:var(--teal-light);display:flex;align-items:center;justify-content:center;font-size:36px;animation:pulse-match 1.5s ease-in-out infinite;margin-bottom:20px;}
+    @keyframes pulse-match{0%,100%{box-shadow:0 0 0 0 rgba(58,158,200,.3)}50%{box-shadow:0 0 0 20px rgba(58,158,200,0)}}
+    .match-searching-txt{font-size:14px;font-weight:600;color:var(--ink-soft);margin-bottom:6px;}
+    .match-searching-sub{font-size:12px;color:var(--ink-faint);}
+    .match-results{display:none;flex-direction:column;gap:14px;}
+    .match-results.show{display:flex;}
+    .match-header{font-size:13px;color:var(--ink-faint);margin-bottom:4px;}
+    .match-card{background:white;border-radius:var(--r);padding:16px;box-shadow:var(--shadow);display:flex;gap:14px;align-items:center;animation:msgIn .4s ease;}
+    @keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .match-ava{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;}
+    .match-info{flex:1;}
+    .match-name{font-size:14px;font-weight:700;}
+    .match-bio{font-size:11px;color:var(--ink-faint);margin-top:2px;line-height:1.5;}
+    .match-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px;}
+    .match-tag{font-size:10px;padding:2px 7px;border-radius:8px;background:var(--teal-light);color:var(--teal);}
+    .match-pct{text-align:right;flex-shrink:0;}
+    .match-pct-num{font-size:20px;font-weight:700;color:var(--teal);}
+    .match-pct-lbl{font-size:9px;color:var(--ink-faint);}
+    .btn-connect{margin-top:10px;width:100%;padding:11px;background:var(--teal);color:white;border:none;border-radius:50px;font-size:13px;font-weight:500;font-family:'Noto Sans TC',sans-serif;cursor:pointer;transition:all .2s;}
+    .btn-connect:hover{background:#2a7da8;}
+    .btn-chat-companion{margin-top:10px;padding:7px 14px;background:var(--teal);color:white;border:none;border-radius:20px;font-size:12px;font-weight:600;font-family:'Noto Sans TC',sans-serif;cursor:pointer;transition:all .2s;}
+    .btn-chat-companion:hover{background:#2a7da8;transform:translateY(-1px);}
+    .companion-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;padding:3px 8px;border-radius:10px;background:var(--amber-light);color:var(--amber);margin-bottom:6px;}
+    .human-bubble{background:white!important;border:1.5px solid rgba(26,24,20,0.12);}
+
+    /* ── TASKS ── */
+    .tasks-wrap{padding:20px;}
+    .wallet-card{background:linear-gradient(135deg,#3a9ec8,#6ab8d8);border-radius:16px;padding:20px;color:white;margin-bottom:22px;}
+    .wallet-title{font-size:12px;opacity:.8;margin-bottom:12px;}
+    .wallet-coins{display:flex;gap:16px;}
+    .wc-item{text-align:center;}
+    .wc-num{font-size:24px;font-weight:700;}
+    .wc-lbl{font-size:10px;opacity:.8;margin-top:2px;}
+    .tasks-section-label{font-size:11px;font-weight:600;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;}
+    .task-list{display:flex;flex-direction:column;gap:10px;margin-bottom:22px;}
+    .task-item{background:white;border-radius:var(--r);padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 8px rgba(26,24,20,.06);cursor:pointer;transition:all .2s;}
+    .task-item.done{opacity:.55;}
+    .task-item:hover:not(.done){transform:translateX(3px);}
+    .task-check{width:24px;height:24px;border-radius:50%;border:2px solid rgba(26,24,20,.2);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;transition:all .2s;}
+    .task-item.done .task-check{background:var(--teal);border-color:var(--teal);color:white;}
+    .task-body{flex:1;}
+    .task-name{font-size:13px;font-weight:500;}
+    .task-item.done .task-name{text-decoration:line-through;color:var(--ink-faint);}
+    .task-reward{font-size:11px;color:var(--amber);margin-top:2px;}
+    .task-type{font-size:10px;padding:2px 7px;border-radius:8px;background:var(--paper2);color:var(--ink-faint);}
+
+    /* ── DOLPHIN PICKER ── */
+    .picker-intro{background:var(--teal-light);border-radius:var(--r);padding:14px 16px;margin-bottom:24px;font-size:12px;color:var(--teal);line-height:1.7;}
+    .picker-intro strong{font-weight:600;display:block;margin-bottom:2px;font-size:13px;}
+    .dolphin-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:8px;}
+    .d-last{grid-column:1/-1;display:flex;justify-content:center;}
+    .d-last .d-card{width:calc(50% - 6px);}
+    .d-card{padding:18px 14px 16px;border-radius:var(--r);border:2.5px solid transparent;cursor:pointer;transition:all .25s;text-align:center;background:white;box-shadow:0 1px 8px rgba(26,24,20,.06);}
+    .d-card:hover{transform:translateY(-3px);box-shadow:var(--shadow);}
+    .d-card.selected{transform:translateY(-3px);box-shadow:var(--shadow);}
+    .d-emoji{font-size:36px;margin-bottom:8px;}
+    .d-name{font-size:14px;font-weight:700;margin-bottom:3px;}
+    .d-role{font-size:11px;opacity:.8;}
+    .d-tag{display:inline-block;margin-top:8px;font-size:10px;padding:2px 8px;border-radius:10px;opacity:.85;}
+    .rand-card{grid-column:1/-1;margin-top:2px;border:2px dashed rgba(26,24,20,.18)!important;background:var(--paper2)!important;display:flex;justify-content:center;}
+    .rand-card:hover{border-color:var(--teal)!important;background:var(--teal-light)!important;}
+    @keyframes spin{0%{transform:rotate(0deg) scale(1)}50%{transform:rotate(180deg) scale(1.3)}100%{transform:rotate(360deg) scale(1)}}
+
+    /* ── CHAT ── */
+    #s-chat{padding:0;display:flex;flex-direction:column;overflow:hidden;}
+    .dolphin-bar{padding:14px 20px;display:flex;gap:12px;align-items:center;border-bottom:1px solid rgba(26,24,20,.08);flex-shrink:0;background:white;}
+    .d-ava{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;}
+    .d-chat-name{font-size:15px;font-weight:700;}
+    .d-chat-type{font-size:11px;color:var(--ink-faint);margin-top:1px;}
+    .d-online{font-size:11px;color:var(--teal-mid);}
+    .chat-msgs{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:12px;}
+    .msg{max-width:82%;animation:msgIn .3s ease;}
+    .msg.bot{align-self:flex-start;} .msg.me{align-self:flex-end;}
+    .bubble{padding:10px 14px;border-radius:18px;font-size:13px;line-height:1.75;}
+    .msg.bot .bubble{background:var(--paper2);border-bottom-left-radius:4px;}
+    .msg.me .bubble{background:var(--teal);color:white;border-bottom-right-radius:4px;}
+    .msg-time{font-size:10px;color:var(--ink-faint);margin-top:4px;padding:0 4px;}
+    .msg.me .msg-time{text-align:right;}
+    .typing{display:flex;gap:4px;padding:12px 14px;background:var(--paper2);border-radius:18px;border-bottom-left-radius:4px;width:fit-content;}
+    .typing span{width:7px;height:7px;border-radius:50%;background:var(--ink-faint);animation:dot 1.2s infinite;}
+    .typing span:nth-child(2){animation-delay:.2s} .typing span:nth-child(3){animation-delay:.4s}
+    @keyframes dot{0%,80%,100%{transform:scale(.7);opacity:.5}40%{transform:scale(1);opacity:1}}
+    .scene-chips{padding:10px 20px 6px;display:flex;flex-direction:column;gap:8px;}
+    .scene-label{font-size:11px;color:var(--ink-faint);}
+    .scene-btn{padding:10px 14px;border:1.5px solid rgba(26,24,20,.12);border-radius:10px;font-size:12px;cursor:pointer;background:white;color:var(--ink-soft);text-align:left;font-family:'Noto Sans TC',sans-serif;transition:all .2s;line-height:1.5;}
+    .scene-btn:hover{border-color:var(--teal);color:var(--teal);background:var(--teal-light);}
+    .float-sim-btn{position:fixed;bottom:88px;right:18px;z-index:60;padding:9px 15px;background:var(--purple);color:white;border:none;border-radius:24px;font-size:12px;font-weight:600;cursor:pointer;box-shadow:0 4px 14px rgba(139,124,200,.35);display:flex;align-items:center;gap:6px;transition:transform .2s,box-shadow .2s;font-family:'Noto Sans TC',sans-serif;}
+    .float-sim-btn:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(139,124,200,.45);}
+    .btn-end-chat{position:absolute;top:16px;right:16px;z-index:3;padding:5px 11px;border:1.5px solid rgba(26,24,20,.18);background:white;border-radius:20px;font-size:11px;color:var(--ink-faint);cursor:pointer;font-family:'Noto Sans TC',sans-serif;transition:all .2s;white-space:nowrap;display:none;}
+    .btn-end-chat:hover{border-color:var(--coral);color:var(--coral);}
+    #s-chat.active .btn-end-chat{display:block;}
+    .farewell-overlay{position:fixed;inset:0;background:rgba(26,24,20,.6);z-index:200;display:flex;align-items:center;justify-content:center;padding:28px;opacity:0;pointer-events:none;transition:opacity .35s;}
+    .farewell-overlay.show{opacity:1;pointer-events:all;}
+    .farewell-card{background:white;border-radius:24px;padding:36px 28px;text-align:center;max-width:320px;width:100%;transform:scale(.85);transition:transform .35s cubic-bezier(.4,0,.2,1);}
+    .farewell-overlay.show .farewell-card{transform:scale(1);}
+    .farewell-ava{font-size:56px;margin-bottom:16px;animation:float 3s ease-in-out infinite;}
+    .farewell-msg{font-size:16px;font-weight:700;line-height:1.6;color:var(--ink);margin-bottom:8px;}
+    .farewell-sub{font-size:12px;color:var(--ink-faint);line-height:1.7;margin-bottom:24px;}
+    .btn-farewell-home{width:100%;padding:13px;background:var(--teal);color:white;border:none;border-radius:50px;font-size:14px;font-weight:600;font-family:'Noto Sans TC',sans-serif;cursor:pointer;transition:all .2s;}
+    .btn-farewell-home:hover{background:#2a7da8;}
+    .chat-input-row{padding:10px 20px 16px;display:flex;gap:10px;border-top:1px solid rgba(26,24,20,.08);flex-shrink:0;background:white;}
+    .chat-input{flex:1;padding:10px 14px;border:1.5px solid rgba(26,24,20,.15);border-radius:24px;font-size:13px;font-family:'Noto Sans TC',sans-serif;background:white;outline:none;transition:border-color .2s;}
+    .chat-input:focus{border-color:var(--teal);}
+    .btn-send{width:40px;height:40px;border:none;background:var(--teal);color:white;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;}
+    .btn-send:hover{background:#2a7da8;}
+    .btn-mic{width:40px;height:40px;border:none;background:var(--paper2);color:var(--ink-soft);border-radius:50%;cursor:pointer;font-size:17px;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;}
+    .btn-mic:hover{background:var(--teal-light);color:var(--teal);}
+    .btn-mic.rec{background:var(--coral-light);color:var(--coral);animation:pulse-rec 1s ease-in-out infinite;}
+    @keyframes pulse-rec{0%,100%{box-shadow:0 0 0 0 rgba(208,112,106,.35)}50%{box-shadow:0 0 0 8px rgba(208,112,106,0)}}
+    .chat-input.rec-active{border-color:var(--coral)!important;}
+
+    /* ── DECISION ── */
+    .situation-box{background:var(--amber-light);border-left:3px solid var(--amber);border-radius:var(--r);padding:14px 16px;margin-bottom:22px;font-size:13px;line-height:1.75;color:var(--ink-soft);}
+    .situation-box strong{color:var(--amber);font-size:11px;display:block;margin-bottom:4px;}
+    .choice-list{display:flex;flex-direction:column;gap:12px;margin-bottom:20px;}
+    .choice-item{border:2px solid rgba(26,24,20,.12);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:all .25s;background:white;}
+    .choice-item:hover{border-color:var(--teal-mid);box-shadow:var(--shadow);}
+    .choice-item.picked{border-color:var(--teal);}
+    .choice-head{padding:14px 16px;display:flex;align-items:center;gap:12px;}
+    .choice-letter{width:28px;height:28px;border-radius:8px;background:var(--paper2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--ink-soft);flex-shrink:0;}
+    .choice-item.picked .choice-letter{background:var(--teal);color:white;}
+    .choice-text{font-size:13px;font-weight:500;flex:1;}
+    .rec-badge{font-size:10px;padding:3px 8px;background:var(--teal);color:white;border-radius:10px;white-space:nowrap;}
+    .choice-outcomes{display:none;flex-direction:column;gap:8px;padding:0 16px 16px;}
+    .choice-item.picked .choice-outcomes{display:flex;}
+    .out-row{display:flex;align-items:center;gap:10px;}
+    .out-label{font-size:11px;color:var(--ink-faint);width:68px;flex-shrink:0;}
+    .bar-track{flex:1;height:8px;background:var(--paper2);border-radius:10px;overflow:hidden;}
+    .bar-fill{height:100%;border-radius:10px;width:0;transition:width .75s cubic-bezier(.4,0,.2,1);}
+    .bar-g{background:var(--teal-mid);} .bar-a{background:var(--amber);} .bar-c{background:var(--coral);}
+    .out-pct{font-size:11px;font-weight:600;width:30px;text-align:right;flex-shrink:0;}
+    .bot-comment{display:none;margin-top:16px;padding:14px 16px;border-radius:var(--r);gap:10px;align-items:flex-start;}
+    .bot-comment.show{display:flex;}
+    .bot-comment-icon{font-size:20px;flex-shrink:0;}
+    .bot-comment-body{font-size:12px;line-height:1.75;}
+
+    /* ── TEACHER ── */
+    .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:22px;}
+    .stat-box{background:var(--paper2);border-radius:var(--r);padding:14px;text-align:center;}
+    .stat-num{font-size:26px;font-weight:700;}
+    .stat-lbl{font-size:10px;color:var(--ink-faint);margin-top:2px;}
+    .stat-box.alert .stat-num{color:var(--coral);} .stat-box.good .stat-num{color:var(--teal);}
+    .sec-label{font-size:11px;font-weight:600;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;}
+    .chart-box{background:white;border-radius:var(--r);padding:16px;margin-bottom:22px;box-shadow:var(--shadow);height:188px;}
+    .stu-list{display:flex;flex-direction:column;gap:10px;}
+    .stu-card{background:white;border-radius:var(--r);padding:14px 16px;display:flex;gap:12px;align-items:center;box-shadow:0 1px 8px rgba(26,24,20,.06);cursor:pointer;transition:all .2s;}
+    .stu-card:hover{transform:translateX(4px);}
+    .stu-ava{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+    .av-r{background:var(--coral-light);} .av-a{background:var(--amber-light);}
+    .stu-info{flex:1;} .stu-name{font-size:13px;font-weight:600;} .stu-reason{font-size:11px;color:var(--ink-faint);margin-top:2px;}
+    .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+    .dot-r{background:var(--coral);} .dot-a{background:var(--amber);}
+
+    /* ── COMPANION ── */
+    .cert-card{background:linear-gradient(135deg,#ba7517,#e09020);border-radius:16px;padding:20px;color:white;margin-bottom:22px;}
+    .cert-level{font-size:11px;opacity:.8;margin-bottom:4px;}
+    .cert-title{font-size:20px;font-weight:700;margin-bottom:12px;}
+    .cert-stats{display:flex;gap:20px;}
+    .cs-item{text-align:center;}
+    .cs-num{font-size:20px;font-weight:700;}
+    .cs-lbl{font-size:10px;opacity:.8;}
+    .avail-tasks{display:flex;flex-direction:column;gap:10px;}
+    .avail-task{background:white;border-radius:var(--r);padding:14px 16px;display:flex;gap:12px;align-items:center;box-shadow:0 1px 8px rgba(26,24,20,.06);}
+    .avail-task-icon{font-size:24px;flex-shrink:0;}
+    .avail-task-info{flex:1;}
+    .avail-task-name{font-size:13px;font-weight:600;}
+    .avail-task-meta{font-size:11px;color:var(--ink-faint);margin-top:2px;}
+    .btn-accept{padding:7px 14px;background:var(--amber);color:white;border:none;border-radius:20px;font-size:11px;font-weight:600;font-family:'Noto Sans TC',sans-serif;cursor:pointer;white-space:nowrap;transition:all .2s;}
+    .btn-accept:hover{background:#9a6010;}
+    .btn-accept.done{background:var(--paper2);color:var(--ink-faint);cursor:default;}
+
+    /* ── MODAL ── */
+    .overlay{position:fixed;inset:0;background:rgba(26,24,20,.5);z-index:100;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .3s;}
+    .overlay.show{opacity:1;pointer-events:all;}
+    .sheet{background:var(--paper);border-radius:20px 20px 0 0;padding:24px 22px 44px;width:100%;transform:translateY(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);}
+    .overlay.show .sheet{transform:translateY(0);}
+    .sheet-handle{width:36px;height:4px;background:var(--paper2);border-radius:2px;margin:0 auto 20px;}
+    .sheet-title{font-size:16px;font-weight:700;margin-bottom:4px;}
+    .sheet-sub{font-size:12px;color:var(--ink-faint);margin-bottom:18px;}
+    .mini-bars{height:80px;background:var(--paper2);border-radius:10px;margin-bottom:0;display:flex;align-items:flex-end;padding:10px 10px 0;gap:4px;}
+    .mb{flex:1;border-radius:4px 4px 0 0;}
+    .mb-label-row{display:flex;gap:4px;padding:4px 10px 0;margin-bottom:14px;}
+    .mb-label{flex:1;font-size:9px;text-align:center;color:var(--ink-faint);}
+    .sheet-note{font-size:12px;color:var(--ink-soft);background:var(--paper2);border-radius:8px;padding:12px 14px;line-height:1.75;}
+    .btn-close{margin-top:16px;width:100%;padding:12px;background:var(--paper2);border:none;border-radius:50px;font-size:14px;font-family:'Noto Sans TC',sans-serif;cursor:pointer;color:var(--ink-soft);}
+    .btn-close:hover{background:var(--teal-light);color:var(--teal);}
+  </style>
+</head>
+<body>
+
+<div class="app-header">
+  <button class="btn-back hidden" id="backBtn" onclick="goBack()">←</button>
+  <div class="header-title" id="hTitle">海豚交友系統</div>
+  <div class="header-badge badge-hidden" id="hBadge"></div>
+</div>
+
+<div class="screen-wrap">
+
+  <!-- 0. SPLASH -->
+  <div class="screen active" id="s-splash">
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100%;text-align:center;padding:40px 24px;background:linear-gradient(160deg,#1a6898 0%,#3a9ec8 55%,#72c0e0 100%);margin:-28px -22px -40px;">
+      <div class="splash-dolphin">🐬</div>
+      <div class="splash-title">海豚交友系統</div>
+      <div class="splash-sub">溫暖、有同理心的社交新體驗<br>讓每個人都找到屬於自己的港灣</div>
+      <button class="btn-start" onclick="nav('s-role')">開始體驗 →</button>
+      <div class="splash-chips">
+        <span class="splash-chip">情緒海洋地圖</span>
+        <span class="splash-chip">智慧配對</span>
+        <span class="splash-chip">決策孿生</span>
+        <span class="splash-chip">陪伴者認證</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1. ROLE -->
+  <div class="screen offRight" id="s-role">
+    <div class="page-heading">你是誰？</div>
+    <div class="page-sub">選擇角色，進入對應的功能介面</div>
+    <div class="role-cards">
+      <div class="role-card rc-user" onclick="pickRole('user')">
+        <div class="role-icon">🧑‍🤝‍🧑</div>
+        <div>
+          <div class="role-title">我是用戶</div>
+          <div class="role-desc">學生、成人、家長都適用。探索情緒海洋、尋找配對夥伴、與海豚聊天獲得支持。</div>
+          <div class="role-feats">
+            <span class="ft">情緒海洋</span><span class="ft">智慧配對</span><span class="ft">海豚聊天</span><span class="ft">決策模擬</span>
+          </div>
+        </div>
+      </div>
+      <div class="role-card rc-companion" onclick="pickRole('companion')">
+        <div class="role-icon">🤝</div>
+        <div>
+          <div class="role-title">我是陪伴者</div>
+          <div class="role-desc">有愛心的認證夥伴，接受陪伴任務、完成培訓認證，賺取珍珠與珊瑚幣獎勵。</div>
+          <div class="role-feats">
+            <span class="ft a">陪伴認證</span><span class="ft a">接單任務</span><span class="ft a">虛擬貨幣</span>
+          </div>
+        </div>
+      </div>
+      <div class="role-card rc-teacher" onclick="pickRole('teacher')">
+        <div class="role-icon">👩‍🏫</div>
+        <div>
+          <div class="role-title">我是教師</div>
+          <div class="role-desc">掌握全班情緒趨勢，提早發現需要關注的學生，做出更好的教學決策。</div>
+          <div class="role-feats">
+            <span class="ft p">班級儀表板</span><span class="ft p">預警系統</span><span class="ft p">趨勢分析</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. HOME (User main with tabs) -->
+  <div class="screen offRight" id="s-home">
+    <div class="home-tabs">
+
+      <!-- Tab: 探索 (Ocean Map) -->
+      <div class="tab-content active" id="tab-ocean">
+        <div class="ocean-header">
+          <div class="ocean-greeting">你好，今天感覺怎麼樣？</div>
+          <div class="coin-bar">
+            <div class="coin-pill">🪙 80</div>
+            <div class="coin-pill star">⭐ 12</div>
+          </div>
+        </div>
+        <div class="ocean-bg">
+          <div class="ocean-prompt">🌊 點擊最符合你現在心情的島嶼</div>
+          <div class="islands-grid" id="islandGrid"></div>
+          <div class="wave-deco">～ 每座島嶼都有專屬的海豚陪你 ～</div>
+        </div>
+      </div>
+
+      <!-- Tab: 配對 -->
+      <div class="tab-content" id="tab-match">
+        <div class="match-wrap">
+          <div class="page-heading" style="margin-bottom:4px;">智慧配對</div>
+          <div class="page-sub" style="margin-bottom:20px;">根據你的特質，找到志同道合的夥伴</div>
+          <div class="match-searching" id="matchSearching">
+            <div class="pulse-ring">🔍</div>
+            <div class="match-searching-txt">正在分析你的心理特質...</div>
+            <div class="match-searching-sub">多維度配對中，請稍候</div>
+          </div>
+          <div class="match-results" id="matchResults">
+            <div class="match-header">為你找到 3 位高度匹配的夥伴 ✨</div>
+            <div class="match-card" style="animation-delay:.1s">
+              <div class="match-ava" style="background:#e1f5ee">😊</div>
+              <div class="match-info">
+                <div class="match-name">阿志</div>
+                <div class="match-bio">大學輔導系 · 傾聽與同理是我的強項，深夜也在線</div>
+                <div class="match-tags">
+                  <span class="match-tag">同理心強</span><span class="match-tag">深夜在線</span><span class="match-tag">社交焦慮</span>
+                </div>
+                <button class="btn-chat-companion" onclick="startCompanionChat(0)">💬 開始聊天</button>
+              </div>
+              <div class="match-pct"><div class="match-pct-num">98%</div><div class="match-pct-lbl">配對度</div></div>
+            </div>
+            <div class="match-card" style="animation-delay:.25s">
+              <div class="match-ava" style="background:#faeeda">🌸</div>
+              <div class="match-info">
+                <div class="match-name">小芸</div>
+                <div class="match-bio">心理系畢業 · 擅長壓力管理與自我肯定引導</div>
+                <div class="match-tags">
+                  <span class="match-tag">職場壓力</span><span class="match-tag">自我成長</span><span class="match-tag">認證陪伴者</span>
+                </div>
+                <button class="btn-chat-companion" onclick="startCompanionChat(1)">💬 開始聊天</button>
+              </div>
+              <div class="match-pct"><div class="match-pct-num">95%</div><div class="match-pct-lbl">配對度</div></div>
+            </div>
+            <div class="match-card" style="animation-delay:.4s">
+              <div class="match-ava" style="background:#eeedfe">🎯</div>
+              <div class="match-info">
+                <div class="match-name">建豪</div>
+                <div class="match-bio">前職涯顧問 · 幫助你找到人生方向與突破困境</div>
+                <div class="match-tags">
+                  <span class="match-tag">職涯發展</span><span class="match-tag">決策思維</span><span class="match-tag">銀級認證</span>
+                </div>
+                <button class="btn-chat-companion" onclick="startCompanionChat(2)">💬 開始聊天</button>
+              </div>
+              <div class="match-pct"><div class="match-pct-num">91%</div><div class="match-pct-lbl">配對度</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: 任務 -->
+      <div class="tab-content" id="tab-tasks">
+        <div class="tasks-wrap">
+          <div class="wallet-card">
+            <div class="wallet-title">🎒 我的海洋錢包</div>
+            <div class="wallet-coins">
+              <div class="wc-item"><div class="wc-num" id="pearlCount">80</div><div class="wc-lbl">🪙 珍珠</div></div>
+              <div class="wc-item"><div class="wc-num" id="starCount">12</div><div class="wc-lbl">⭐ 海星</div></div>
+              <div class="wc-item"><div class="wc-num" id="coralCount">5</div><div class="wc-lbl">🪸 珊瑚幣</div></div>
+            </div>
+          </div>
+          <div class="tasks-section-label">今日任務</div>
+          <div class="task-list" id="taskList"></div>
+          <div class="tasks-section-label">本週挑戰</div>
+          <div class="task-list">
+            <div class="task-item done">
+              <div class="task-check">✓</div>
+              <div class="task-body"><div class="task-name">連續記錄情緒 3 天</div><div class="task-reward">+1 ⭐ 海星</div></div>
+              <span class="task-type">完成</span>
+            </div>
+            <div class="task-item">
+              <div class="task-check"></div>
+              <div class="task-body"><div class="task-name">完成 5 次決策模擬</div><div class="task-reward">+2 ⭐ 海星</div></div>
+              <span class="task-type">3/5</span>
+            </div>
+            <div class="task-item">
+              <div class="task-check"></div>
+              <div class="task-body"><div class="task-name">與不同性格海豚各聊一次</div><div class="task-reward">+1 🪸 珊瑚幣</div></div>
+              <span class="task-type">2/5</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Nav -->
+      <div class="bottom-nav">
+        <button class="bnav-btn on" id="bnav-ocean" onclick="switchTab('ocean')"><span>🌊</span><span>探索</span></button>
+        <button class="bnav-btn" id="bnav-match" onclick="switchTab('match')"><span>🐬</span><span>配對</span></button>
+        <button class="bnav-btn" id="bnav-tasks" onclick="switchTab('tasks')"><span>✅</span><span>任務</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. DOLPHIN PICKER -->
+  <div class="screen offRight" id="s-dolphin">
+    <div class="page-heading">選擇你的海豚夥伴</div>
+    <div class="page-sub">每種海豚有不同的個性，你想和哪一個聊？</div>
+    <div class="picker-intro"><strong>💡 小提示</strong>不同海豚從不同角度幫你思考。依今天心情選擇，或嘗試平常不熟悉的視角！</div>
+    <div class="dolphin-grid" id="dolphinGrid"></div>
+  </div>
+
+  <!-- 4. CHAT -->
+  <div class="screen offRight" id="s-chat">
+    <button class="btn-end-chat" onclick="endChat()">結束 ✕</button>
+    <div class="dolphin-bar" id="chatHeader"></div>
+    <div class="chat-msgs" id="chatMsgs"></div>
+    <div class="scene-chips" id="sceneChips">
+      <div class="scene-label">選一個話題，或直接輸入</div>
+      <button class="scene-btn" onclick="pickScene(0)">😔 我跟好朋友吵架了，不知道怎麼辦...</button>
+      <button class="scene-btn" onclick="pickScene(1)">😰 朋友叫我幫他作業，很為難</button>
+      <button class="scene-btn" onclick="pickScene(2)">😟 班上有人一直排擠我</button>
+    </div>
+    <div class="chat-input-row">
+      <input class="chat-input" id="chatIn" placeholder="說說你的感受..." onkeydown="if(event.key==='Enter')sendMsg()">
+      <button class="btn-mic" id="micBtn" onclick="toggleVoice()" title="語音輸入">🎤</button>
+      <button class="btn-send" onclick="sendMsg()">→</button>
+    </div>
+  </div>
+
+  <!-- 5. DECISION -->
+  <div class="screen offRight" id="s-decision">
+    <div class="page-heading">決策模擬器</div>
+    <div class="page-sub">點選不同選項，看看可能的結果</div>
+    <div class="situation-box"><strong>📍 情境</strong><span id="situTxt"></span></div>
+    <div class="choice-list" id="choiceList"></div>
+    <div class="bot-comment" id="botComment"><span class="bot-comment-icon">🐬</span><div class="bot-comment-body" id="botCommentTxt"></div></div>
+  </div>
+
+  <!-- 6. TEACHER -->
+  <div class="screen offRight" id="s-teacher">
+    <div class="page-heading">班級儀表板</div>
+    <div class="page-sub">三年甲班 · 本週概況</div>
+    <div class="stats-row">
+      <div class="stat-box good"><div class="stat-num">23</div><div class="stat-lbl">班級人數</div></div>
+      <div class="stat-box alert"><div class="stat-num">5</div><div class="stat-lbl">需要關注</div></div>
+      <div class="stat-box"><div class="stat-num">78%</div><div class="stat-lbl">今日記錄率</div></div>
+    </div>
+    <div class="sec-label">本週情緒趨勢</div>
+    <div class="chart-box"><canvas id="moodChart"></canvas></div>
+    <div class="sec-label">需要關注的學生</div>
+    <div class="stu-list">
+      <div class="stu-card" onclick="openSheet('王小明','連續三天記錄「壓力大」，昨天提及人際衝突，已主動使用決策模擬器兩次。',[2,2,1,1,2,1,2])">
+        <div class="stu-ava av-r">🧑</div>
+        <div class="stu-info"><div class="stu-name">王小明</div><div class="stu-reason">連續三天情緒低落 · 提及人際衝突</div></div>
+        <div class="dot dot-r"></div>
+      </div>
+      <div class="stu-card" onclick="openSheet('陳小雯','上週參與率正常，本週已三天未記錄情緒，課堂觀察表現也較安靜。',[4,4,3,0,0,0,0])">
+        <div class="stu-ava av-a">👧</div>
+        <div class="stu-info"><div class="stu-name">陳小雯</div><div class="stu-reason">本週連續三天未記錄情緒</div></div>
+        <div class="dot dot-a"></div>
+      </div>
+      <div class="stu-card" onclick="openSheet('林阿杰','本週多次記錄焦慮情緒，並詢問考試前的決策情境，呈現高度測驗焦慮跡象。',[3,3,2,2,2,3,2])">
+        <div class="stu-ava av-a">🧒</div>
+        <div class="stu-info"><div class="stu-name">林阿杰</div><div class="stu-reason">本週焦慮指數偏高 · 多次使用決策模擬</div></div>
+        <div class="dot dot-a"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. COMPANION -->
+  <div class="screen offRight" id="s-companion">
+    <div class="page-heading">陪伴者中心</div>
+    <div class="page-sub">認證陪伴者 · 賺取海洋幣</div>
+    <div class="cert-card">
+      <div class="cert-level">認證等級</div>
+      <div class="cert-title">🥈 銀級陪伴者</div>
+      <div class="cert-stats">
+        <div class="cs-item"><div class="cs-num">47</div><div class="cs-lbl">完成任務</div></div>
+        <div class="cs-item"><div class="cs-num">4.9</div><div class="cs-lbl">平均評分</div></div>
+        <div class="cs-item"><div class="cs-num">320</div><div class="cs-lbl">🪙 珍珠</div></div>
+      </div>
+    </div>
+    <div class="sec-label">培訓進度</div>
+    <div style="background:white;border-radius:var(--r);padding:16px;box-shadow:var(--shadow);margin-bottom:22px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:13px;font-weight:500;">進階情緒支持技巧 <span style="color:var(--amber);font-size:12px;">60%</span></div>
+      <div style="height:8px;background:var(--paper2);border-radius:10px;overflow:hidden;"><div style="height:100%;width:60%;background:var(--amber);border-radius:10px;"></div></div>
+      <div style="font-size:11px;color:var(--ink-faint);margin-top:8px;">完成後升級為 🥇 金級 · 解鎖深夜接單權限</div>
+    </div>
+    <div class="sec-label">可接受的任務</div>
+    <div class="avail-tasks" id="availTasks"></div>
+  </div>
+
+</div>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay" onclick="closeSheet(event)">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="shTitle"></div>
+    <div class="sheet-sub">本週情緒記錄（一 → 日）</div>
+    <div class="mini-bars" id="miniBars"></div>
+    <div class="mb-label-row" id="miniLabels"></div>
+    <div class="sheet-note" id="shNote"></div>
+    <button class="btn-close" onclick="closeSheet()">關閉</button>
+  </div>
+</div>
+
+<script>
+const DOLPHINS=[{name:'小理',full:'理性海豚',role:'分析利弊得失',color:'#185fa5',bg:'#e6f1fb',tagBg:'#185fa5',tagColor:'white',greeting:'嗨，我是小理 🐬 分析問題是我的強項，讓我們把你的狀況拆解清楚。有什麼想聊的嗎？',openers:['三天沒說話，關係修復的黃金期正在縮短 📊 你們的友誼持續多久了？長期友誼主動溝通成功率更高。','先分析風險——「被發現的機率×懲罰嚴重度」跟「拒絕後失去友誼的機率×損失程度」，哪邊期望損失比較大？','先釐清根源：是單一事件引發？還是長期累積？找出原因，才能選對解決方案。'],replies:['我理解了。根據你描述的情況，有幾個關鍵變數需要考量——','好，關鍵資訊掌握了。讓我們用決策模擬來量化不同選擇的結果。']},{name:'小珊',full:'情緒海豚',role:'重視當下感受',color:'#7a2c14',bg:'#faece7',tagBg:'#993c1d',tagColor:'white',greeting:'嗨，我是小珊 🐬 你今天的感受對我最重要。不管發生什麼，我都在這裡陪著你 💙',openers:['三天沒說話......那種沉默讓我感到很難受 😢 你現在心裡最強烈的感覺是什麼？','夾在朋友和良心之間，這種感覺一定很沉重 😔 你現在最擔心的是哪一邊？','被排除在外的孤單，真的很痛 💔 你第一次感覺到被排擠是什麼時候？'],replies:['謝謝你告訴我這些 💙 我感受到你有多在意這件事......','你的感受是最重要的線索。讓我們一起用決策模擬，找到最能保護你情感的選擇。']},{name:'小勇',full:'勇氣海豚',role:'鼓勵冒險挑戰',color:'#7a4e0a',bg:'#faeeda',tagBg:'#ba7517',tagColor:'white',greeting:'嗨，我是小勇 🐬 遇到問題最重要的是行動力！跟我說說發生了什麼，我們一起突破它！🔥',openers:['三天了還在等——是時候主動出擊了！🔥 你在等什麼？你最怕哪種結果？','這種時候需要勇敢說出立場的力量！拒絕不是傷害，反而是最真誠的尊重。你怕的是什麼？','被排擠？讓他們看看你的實力！🌟 你有沒有想過主動去認識其他有趣的同學？'],replies:['對！你已經看清楚問題了，現在缺的只是跨出那一步——','你比想像的更有力量！來，用決策模擬看看哪個選擇最能讓你往前走。']},{name:'小安',full:'安全海豚',role:'降低決策風險',color:'#0a4d3a',bg:'#e1f5ee',tagBg:'#0f6e56',tagColor:'white',greeting:'嗨，我是小安 🐬 我會幫你把每個選擇的風險都想清楚，讓你做出最穩妥的決定。',openers:['三天沒說話，情緒可能還有波動。你確定自己現在的狀態，適合進行一次重要的對話嗎？','先冷靜評估風險：如果被發現，後果是什麼？你能承受嗎？再想想拒絕後最壞的情況。','在採取任何行動前，先確保自己情緒穩定。你現在有可以傾訴的人嗎——家人或信任的師長？'],replies:['我聽到了。在想怎麼做之前，先確認你現在是安全的、情緒是穩定的......','我們已經把主要風險梳理清楚了。讓我們用決策模擬，找出風險最低的選擇。']},{name:'小紫',full:'社交海豚',role:'人際關係優先',color:'#3b3282',bg:'#eeedfe',tagBg:'#534ab7',tagColor:'white',greeting:'嗨，我是小紫 🐬 人際關係是一切的核心！告訴我你和誰之間發生了什麼？我最擅長幫你想清楚關係的影響 💜',openers:['三天沒說話，共同朋友有沒有注意到？這件事有沒有開始影響你在班上的其他關係？','朋友向你求助說明他信任你。但這件事傳出去對你們兩個在班上的形象各有什麼影響？','被排擠通常跟某個關鍵人物有關。你覺得是誰在主導？搞好跟他的關係，情況會不會不同？'],replies:['我在幫你想這件事對整體關係網絡的影響......','人際關係很複雜，但我們可以找到最能維護你重要連結的做法。來用決策模擬看看。']}];
+const SCENARIOS=[{situ:'我跟好朋友因為一件誤解吵架了，已經三天沒說話。我很在乎這段友誼，但又不確定要不要先道歉。',choices:[{l:'A',t:'主動傳訊息道歉，解釋清楚誤會',rec:true,outs:[{lb:'關係修復',cl:'bar-g',pct:75},{lb:'尷尬收場',cl:'bar-a',pct:18},{lb:'更嚴重',cl:'bar-c',pct:7}],tip:'這個選擇需要勇氣，但主動溝通是最有效的方式。大多數情況下，真誠的道歉都能化解誤解。'},{l:'B',t:'等他先來找我，先冷靜幾天',rec:false,outs:[{lb:'自然和解',cl:'bar-g',pct:35},{lb:'繼續冷戰',cl:'bar-a',pct:45},{lb:'友誼破裂',cl:'bar-c',pct:20}],tip:'等待有時必要，但長時間冷戰可能讓誤解加深。若超過一週對方沒主動，建議你採取行動。'},{l:'C',t:'請共同朋友幫忙轉達調解',rec:false,outs:[{lb:'成功調解',cl:'bar-g',pct:55},{lb:'事情複雜化',cl:'bar-a',pct:30},{lb:'誤解更深',cl:'bar-c',pct:15}],tip:'第三方調解有一定效果，但也可能讓事情更複雜。如果直接溝通太難，這是個折衷方案。'}]},{situ:'好朋友說他沒時間做作業，求我把作業借他抄。我不想讓他失望，但又擔心被老師發現一起受罰。',choices:[{l:'A',t:'拒絕，但提議一起在下課前完成',rec:true,outs:[{lb:'維持信任',cl:'bar-g',pct:72},{lb:'朋友不開心',cl:'bar-a',pct:23},{lb:'關係受損',cl:'bar-c',pct:5}],tip:'最有智慧的選擇——你幫助了朋友，也保護了自己。真正的朋友會尊重你的邊界。'},{l:'B',t:'借他抄，這次就算了',rec:false,outs:[{lb:'暫時解決',cl:'bar-g',pct:40},{lb:'成為習慣',cl:'bar-a',pct:40},{lb:'一起被罰',cl:'bar-c',pct:20}],tip:'短期解決了問題，但這可能成為習慣，讓你持續面臨風險。你值得有自己的界限。'},{l:'C',t:'直接拒絕，說明自己也有壓力',rec:false,outs:[{lb:'朋友理解',cl:'bar-g',pct:50},{lb:'短暫不滿',cl:'bar-a',pct:38},{lb:'誤解你',cl:'bar-c',pct:12}],tip:'誠實說出自己的處境是勇敢的。大部分朋友都能理解；如果不理解，可能需要重新評估這段關係。'}]},{situ:'班上一群同學成立了群組，刻意把我排在外面。午餐時間也常常找不到人一起坐，感覺很孤單。',choices:[{l:'A',t:'主動接近其他同學，建立新的連結',rec:true,outs:[{lb:'找到新朋友',cl:'bar-g',pct:65},{lb:'慢慢融入',cl:'bar-a',pct:25},{lb:'再次碰壁',cl:'bar-c',pct:10}],tip:'把眼光放寬，班上可能有其他也在尋找朋友的人。不要讓一個圈子定義你的人際關係。'},{l:'B',t:'直接去問其中一個同學發生了什麼',rec:false,outs:[{lb:'誤會解開',cl:'bar-g',pct:45},{lb:'尷尬但平和',cl:'bar-a',pct:35},{lb:'衝突升高',cl:'bar-c',pct:20}],tip:'直接溝通需要很大勇氣，可能是最快解決問題的方式，但也要做好接受各種回應的心理準備。'},{l:'C',t:'告訴導師或輔導老師請求協助',rec:false,outs:[{lb:'得到支持',cl:'bar-g',pct:70},{lb:'同學知道',cl:'bar-a',pct:20},{lb:'情況複雜化',cl:'bar-c',pct:10}],tip:'向大人求助是你的權利，不是軟弱。輔導老師受過專業訓練，可以幫助你更有效地處理這個狀況。'}]}];
+const ISLANDS=[{emoji:'🌙',name:'深夜焦慮島',desc:'夜晚難以入睡，思緒紊亂',tag:'情緒海豚陪你',tagColor:'#993c1d',tagBg:'#faece7'},{emoji:'💼',name:'工作壓力島',desc:'職場壓力大，需要出口',tag:'理性海豚幫你分析',tagColor:'#7a4e0a',tagBg:'#faeeda'},{emoji:'⭐',name:'自我肯定島',desc:'想要找到自信與方向',tag:'勇氣海豚陪你前進',tagColor:'#0a4d3a',tagBg:'#e1f5ee'},{emoji:'🎨',name:'創意舒壓島',desc:'釋放壓力，重燃動力',tag:'社交海豚帶你玩',tagColor:'#3b3282',tagBg:'#eeedfe'},{emoji:'🤝',name:'社交焦慮島',desc:'人際關係讓你困擾',tag:'安全海豚穩住你',tagColor:'#185fa5',tagBg:'#e6f1fb'}];
+const DAILY_TASKS=[{name:'今日情緒記錄',reward:'+5 🪙 珍珠',done:true,pearl:5},{name:'關心一位朋友',reward:'+10 🪙 珍珠',done:false,pearl:10},{name:'分享今日感恩日記',reward:'+8 🪙 珍珠',done:false,pearl:8},{name:'完成一次決策模擬',reward:'+15 🪙 珍珠',done:false,pearl:15},{name:'使用深夜陪伴服務',reward:'+20 🪙 珍珠',done:false,pearl:20}];
+const COMPANIONS=[{name:'阿志',bio:'大學輔導系 · 銀級認證',ava:'😊',avaBg:'#e1f5ee',color:'#0f6e56',greeting:'嗨！我是阿志 😊 很高興認識你！我是輔導系的，非常喜歡聽朋友說說心裡的事。你今天怎麼了，有什麼想聊聊的嗎？',replies:[['我聽到了，謝謝你願意跟我說 💙 能跟我說說更多嗎？','真的嗎，那一定很難受。我在這裡，不用急，慢慢說。'],['嗯嗯，我理解你的感受。其實很多人都有類似的經歷，你不是一個人 🤝','你說的這個狀況，我覺得可以從幾個角度來想......要不要試試看決策模擬器？'],['你處理這件事的方式已經很不錯了 🌟','好，我們一起來用決策模擬，看看不同做法的可能結果！']]},{name:'小芸',bio:'心理系畢業 · 金級認證',ava:'🌸',avaBg:'#faeeda',color:'#ba7517',greeting:'你好，我是小芸 🌸 心理系出身，特別擅長幫大家找到壓力的出口和自我肯定的方向。有什麼讓你最近困擾的事嗎？',replies:[['謝謝你願意分享，我聽到了你說的 💛 這種感受在你身上一定已經累積一段時間了？','你剛才說的讓我想多了解一點——這件事對你影響最大的部分是什麼？'],['你已經在主動思考這個問題，這本身就是一種力量 ✨','我想幫你釐清思路。這種情況下，通常有幾個方向可以嘗試......'],['我相信你可以處理好這件事 💪 要不要一起用決策模擬，把選項更具體地分析看看？','很好！你的想法已經非常清晰了，讓我們進一步模擬吧。']]},{name:'建豪',bio:'前職涯顧問 · 金級認證',ava:'🎯',avaBg:'#eeedfe',color:'#534ab7',greeting:'嗨，我是建豪 🎯 做過幾年職涯顧問，現在轉型成陪伴者。我比較擅長幫你把問題拆解清楚、找到行動方向。你最近在煩什麼？',replies:[['了解。我先確認一下我是否理解正確——你現在最困擾的核心問題是什麼？','好，我聽清楚了。這類情況其實有幾個很實用的思考框架......'],['你說的這個問題，本質上是一個「優先順序」的問題。你有想過哪個選項對你長期最有利嗎？','我的建議是：先把所有選項列出來，再評估每個的風險與機會。'],['你其實已經有了很清楚的方向，只是需要一點確認 💡','要不要試試決策模擬？我陪你一起把結果量化，做出最有把握的選擇。']]}];
+const COMPANION_TASKS=[{icon:'🌙',name:'深夜陪伴',meta:'用戶：小雨 · 社交焦慮 · 預計 30 分鐘',reward:'+30 🪙'},{icon:'💬',name:'情緒傾聽',meta:'用戶：匿名 · 職場壓力 · 預計 20 分鐘',reward:'+20 🪙'},{icon:'🎯',name:'決策引導',meta:'用戶：阿明 · 升學選擇困難 · 預計 45 分鐘',reward:'+45 🪙'}];
+const CHAT_SCENE_LABELS=['我跟好朋友冷戰三天，很怕主動說話會更尷尬。','朋友想借我的作業抄，我想幫他又怕一起犯錯。','班上有人把我排除在群組外，我覺得自己好像不被需要。'];
+function applyGoalAlignedChatContent(){
+  const upgradedDolphins=[
+    {
+      greeting:'嗨，我是小理 🐬 我會陪你把情況拆清楚：發生了什麼、你在意什麼、有哪些選擇。你不用一次講完整，先說最困擾你的那一段就好。',
+      openers:[
+        '先把問題拆小：這場冷戰裡，你最想修復的是「誤會本身」、還是「你們之間的信任感」？如果知道目標，下一步會比較清楚。',
+        '這不是單純要不要幫忙，而是「幫朋友」和「守住界線」要同時成立。你比較擔心朋友失望，還是被老師發現後關係和信任都受傷？',
+        '被排除很容易讓人開始懷疑自己。先不要把它當成你的錯，我們可以分辨：這是誤會、圈子習慣，還是持續性的排擠。最近有沒有某個事件是轉折點？'
+      ],
+      replies:[
+        '我先幫你整理：你不是只想贏或逃避，你其實想保護關係，也保護自己的感受。這是很重要的線索。',
+        '下一步可以用三個角度評估：短期尷尬、長期關係、你的安全感。若其中一項風險太高，就需要調整做法。',
+        '我建議進入決策模擬器，把每個選擇的可能結果攤開看。你做決定時會比較不被當下情緒拉著走。'
+      ]
+    },
+    {
+      greeting:'嗨，我是小珊 🐬 先不用急著解決問題，我想先知道你現在心裡最重的是委屈、害怕、內疚，還是孤單？說出來就已經是第一步。',
+      openers:[
+        '三天沒有說話真的會讓人很不安。你在乎這段友誼，所以才會這麼拉扯。此刻你最怕的是被拒絕，還是怕自己先低頭就輸了？',
+        '你想幫朋友，代表你很重感情；但你也在擔心後果，這表示你的界線正在提醒你。你希望朋友怎麼理解你的難處？',
+        '被排在外面很痛，尤其午餐或群組這種每天都會碰到的時刻。你現在最需要的是有人聽你說、有人陪你面對，還是想知道怎麼重新建立連結？'
+      ],
+      replies:[
+        '謝謝你願意講。你的感受不是小題大作，因為人際關係本來就會影響安全感和自我價值。',
+        '我們先把情緒安放好，再做決定。你可以先問自己：哪個選擇會讓明天的我比較能安心睡覺？',
+        '如果你準備好了，我們可以用決策模擬器把選項變具體；如果還沒準備好，也可以先找一位信任的大人或陪伴者聊聊。'
+      ]
+    },
+    {
+      greeting:'嗨，我是小勇 🐬 勇敢不是硬衝，而是在害怕時仍然做一個對自己有幫助的小行動。我會陪你把下一步縮到可以做到的大小。',
+      openers:[
+        '冷戰三天很難受，但你可以先不用一次談完。第一步可以只是傳一句：「我想把誤會說清楚，你願意找時間聊聊嗎？」你覺得這句話可行嗎？',
+        '你可以拒絕抄作業，同時提供真正的幫忙：「我不能借你抄，但我可以陪你一起做前兩題。」這樣既有界線，也有善意。',
+        '被排除時，勇敢不一定是直接對抗。也可以是今天先找一位比較友善的同學一起吃飯，建立新的支點。你腦中有這樣的人嗎？'
+      ],
+      replies:[
+        '很好，你已經開始把問題變成行動了。小行動比完美答案更重要。',
+        '我會建議你選一個今天就能完成、風險不高的步驟。完成後再看對方反應，而不是一次賭上全部關係。',
+        '接下來進決策模擬器，我們把「最勇敢」和「最安全」的做法放在一起比較，找出真正適合你的選擇。'
+      ]
+    },
+    {
+      greeting:'嗨，我是小安 🐬 我會先幫你確認安全、界線和可求助的人。你不需要獨自承擔所有後果，我們一步一步來。',
+      openers:[
+        '在重要對話前，先確認你現在夠穩定嗎？如果情緒很滿，可以先寫下想說的三句話，等比較平靜再傳。',
+        '這件事有違規風險，所以你的猶豫很合理。真正安全的幫忙，是不讓你和朋友一起陷入更麻煩的處境。',
+        '如果排擠是持續的，這已經不是你一個人要處理的問題。你身邊有導師、輔導老師、家人或可信任的同學可以先知道嗎？'
+      ],
+      replies:[
+        '我先確認一件事：如果這件事讓你出現傷害自己、被威脅或被霸凌的感覺，請立刻找身邊可信任的大人或當地緊急資源協助。',
+        '在一般情況下，我們可以先選擇低風險行動：不公開指責、不讓第三方擴散、不在情緒最高點做決定。',
+        '現在適合進決策模擬器，找出既能保護你、也能保留關係修復空間的方案。'
+      ]
+    },
+    {
+      greeting:'嗨，我是小紫 🐬 我會幫你看見關係網絡：誰是關鍵人物、誰能支持你、哪一步最能修復連結而不是擴大衝突。',
+      openers:[
+        '冷戰不只影響你和朋友，也可能影響共同朋友圈。你希望這件事最後是私下和好，還是需要有人幫你們創造談話機會？',
+        '朋友會找你幫忙，代表他信任你；但真正好的關係也要能尊重界線。你們平常有沒有互相幫忙、但不越界的方式？',
+        '被群組排除時，先找出支持點很重要。班上有沒有一位比較中立、跟你互動還算自然的人？我們可以從他開始。'
+      ],
+      replies:[
+        '我聽見你在乎的不只是單一事件，而是「我還屬不屬於這段關係」。這是很核心的需求。',
+        '關係修復通常需要兩件事：一個不攻擊的開場，以及一個可以退一步的空間。我們可以幫你設計。',
+        '進入決策模擬器後，我會特別看每個選擇對關係網絡的影響，讓你不要只看眼前輸贏。'
+      ]
+    }
+  ];
+  upgradedDolphins.forEach((item,i)=>Object.assign(DOLPHINS[i],item));
+  COMPANIONS[0].greeting='嗨，我是阿志 😊 我是認證陪伴者。你可以先放心說，我會先聽懂你的感受，再陪你整理下一步；如果內容涉及安全或傷害風險，我也會陪你找更適合的專業支持。';
+  COMPANIONS[0].replies=[
+    ['我聽到了，這件事對你來說不是小事。你願意說，是因為你其實還在乎自己和這段關係。','先不用急著判斷誰對誰錯。你現在最需要的是被理解、修復關係，還是先讓自己穩下來？'],
+    ['我幫你整理一下：一邊是你想維持連結，一邊是你怕受傷或做錯。這種拉扯很正常。','我們可以先找一個最小行動，不需要一次解決全部，只要讓情況往比較安全的方向移動。'],
+    ['如果你願意，我們進決策模擬器看三種做法的後果；如果你現在情緒太滿，也可以先做一次呼吸或找信任的大人陪你。','我會陪你把選項說清楚，但最後的決定會尊重你的步調。']
+  ];
+  COMPANIONS[1].greeting='你好，我是小芸 🌸 我會用比較溫柔但有結構的方式陪你：先辨認感受，再看需求，最後才談選擇。你不用表現得很堅強。';
+  COMPANIONS[1].replies=[
+    ['謝謝你願意分享。你現在的感受值得被認真對待，不需要先證明自己有多嚴重。','這件事裡，最刺痛你的是被誤會、被拒絕、還是覺得自己不重要？'],
+    ['當我們知道真正受傷的位置，選擇就會比較清楚。你要的也許不是立刻贏回對方，而是重新感覺自己有價值。','我會建議先選一個能照顧情緒、又不讓事情升高的做法。'],
+    ['我們可以用決策模擬器把每個選擇的情緒成本也算進去，不只看表面成功率。','若你覺得自己已經撐不住，請先找身邊可信任的大人或專業資源，不要一個人忍著。']
+  ];
+  COMPANIONS[2].greeting='嗨，我是建豪 🎯 我會陪你把問題變成可行方案：目標是什麼、限制是什麼、今天能做哪一步。先跟我說最卡住你的地方。';
+  COMPANIONS[2].replies=[
+    ['了解。我先幫你抓核心：你現在需要的是修復關係、守住界線，還是重新建立支持圈？','如果目標不同，最佳做法也會不同，所以我們先把目標說清楚。'],
+    ['接下來可以用「低風險、可回頭、可追蹤」三個原則設計行動。這樣就算結果不如預期，也不會把局面推到最壞。','我建議先選一個 24 小時內能完成的小步驟。'],
+    ['走，進決策模擬器。我們把選項量化，讓你不是靠猜，而是有依據地做決定。','做完模擬後，你可以把行動句子寫下來，明天照著做就好。']
+  ];
+  SCENARIOS[0].situ='我跟好朋友因為誤會冷戰三天。我很在乎這段友誼，但又怕自己先開口會被拒絕，或讓對方覺得都是我的錯。';
+  SCENARIOS[0].choices[0].t='先傳低壓訊息，表達想把誤會說清楚';
+  SCENARIOS[0].choices[0].tip='推薦做法：先表達在乎與願意溝通，不急著爭對錯。訊息可以很短，例如：「我有點在意我們這幾天沒說話，想找時間把誤會說清楚。」';
+  SCENARIOS[0].choices[1].tip='等待可以讓情緒降溫，但若沒有設定期限，冷戰容易變成新的傷害。建議最多觀察一兩天，之後採取低壓主動。';
+  SCENARIOS[0].choices[2].tip='第三方協調適合你們暫時無法直接對話時使用，但要選中立且可信任的人，避免讓更多同學加入討論。';
+  SCENARIOS[1].situ='好朋友說他沒時間做作業，求我借他抄。我想幫他，也怕拒絕後關係變差，但我知道一起違規可能讓我們都受罰。';
+  SCENARIOS[1].choices[0].t='拒絕抄襲，但陪他一起完成一部分';
+  SCENARIOS[1].choices[0].tip='推薦做法：把「拒絕違規」和「願意幫忙」分開。你可以說：「我不能借你抄，但我可以陪你一起想前幾題。」這能保護界線，也保留關係。';
+  SCENARIOS[1].choices[1].tip='這個選擇短期看似保住友誼，但會讓你承擔違規風險，也可能讓對方下次繼續要求。';
+  SCENARIOS[1].choices[2].tip='直接拒絕是可以的，但若語氣太硬可能造成誤會。建議加上一句原因和替代幫忙方式。';
+  SCENARIOS[2].situ='班上一群同學成立群組，刻意把我排在外面。午餐時間也常常找不到人一起坐，我開始覺得是不是自己不值得被喜歡。';
+  SCENARIOS[2].choices[0].t='先找一位友善同學建立新的連結';
+  SCENARIOS[2].choices[0].tip='推薦做法：不要讓單一圈子定義你的價值。先找到一個安全支點，讓自己不再孤立，之後再決定是否處理原本的圈子。';
+  SCENARIOS[2].choices[1].tip='直接詢問可以釐清誤會，但建議先選一位較中立的人私下問，避免在群體面前讓壓力升高。';
+  SCENARIOS[2].choices[2].tip='如果排除是持續性的，向導師或輔導老師求助很重要。這不是告狀，而是讓大人協助保護你的學習與社交安全。';
+}
+applyGoalAlignedChatContent();
+let stack=['s-splash'],cur='s-splash',dolphinIdx=0,scene=0,chatRound=0,chartInst=null,matchTriggered=false,pearls=80,stars=12,corals=5,chatMode='dolphin',companionIdx=0;
+function setSimBtn(show){const b=document.getElementById('floatSimBtn');if(b)b.style.display=show?'flex':'none';}
+function nav(id){const f=document.getElementById(cur),t=document.getElementById(id);f.classList.remove('active');f.classList.add('offLeft');t.classList.remove('offLeft','offRight');t.classList.add('active');stack.push(id);cur=id;updateHeader(id);setSimBtn(id==='s-chat');if(id==='s-home')initHome();if(id==='s-dolphin')buildDolphinPicker();if(id==='s-chat')initChat();if(id==='s-teacher')setTimeout(initChart,300);if(id==='s-companion')initCompanion();}
+function goBack(){if(stack.length<=1)return;const from=stack.pop(),to=stack[stack.length-1];document.getElementById(from).classList.remove('active');document.getElementById(from).classList.add('offRight');document.getElementById(to).classList.remove('offLeft','offRight');document.getElementById(to).classList.add('active');cur=to;updateHeader(to);setSimBtn(to==='s-chat');}
+const TITLES={'s-splash':'海豚交友系統','s-role':'選擇角色','s-home':'海豚交友系統','s-dolphin':'選擇海豚夥伴','s-chat':'聊天','s-decision':'決策模擬器','s-teacher':'班級儀表板','s-companion':'陪伴者中心'};
+function updateHeader(id){const d=DOLPHINS[dolphinIdx];document.getElementById('hTitle').textContent=id==='s-chat'?`與${d.name}對話`:(TITLES[id]||'');document.getElementById('backBtn').classList.toggle('hidden',id==='s-splash'||id==='s-home');const b=document.getElementById('hBadge');if(['s-home','s-dolphin','s-chat','s-decision'].includes(id)){b.textContent='用戶';b.className='header-badge badge-user';}else if(id==='s-teacher'){b.textContent='教師';b.className='header-badge badge-teacher';}else if(id==='s-companion'){b.textContent='陪伴者';b.className='header-badge badge-companion';}else{b.className='header-badge badge-hidden';}}
+function pickRole(r){if(r==='user')nav('s-home');else if(r==='teacher')nav('s-teacher');else nav('s-companion');}
+function initHome(){buildIslands();buildTaskList();switchTab('ocean');}
+function switchTab(tab){document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('on'));document.getElementById('tab-'+tab).classList.add('active');document.getElementById('bnav-'+tab).classList.add('on');if(tab==='match'&&!matchTriggered){matchTriggered=true;startMatching();}}
+function buildIslands(){const grid=document.getElementById('islandGrid');if(!grid)return;grid.innerHTML='';ISLANDS.forEach((isl,i)=>{if(i===4){const wrap=document.createElement('div');wrap.className='span2';const card=makeIslandCard(isl,i);wrap.appendChild(card);grid.appendChild(wrap);}else{grid.appendChild(makeIslandCard(isl,i));}});}
+function makeIslandCard(isl,i){const card=document.createElement('div');card.className='island-card';card.innerHTML=`<div class="island-emoji">${isl.emoji}</div><div class="island-name">${isl.name}</div><div class="island-desc">${isl.desc}</div><div class="island-tag" style="background:${isl.tagBg};color:${isl.tagColor}">${isl.tag}</div>`;card.onclick=()=>nav('s-dolphin');return card;}
+function startMatching(){setTimeout(()=>{document.getElementById('matchSearching').style.display='none';document.getElementById('matchResults').classList.add('show');},2200);}
+function buildTaskList(){const list=document.getElementById('taskList');if(!list)return;list.innerHTML='';DAILY_TASKS.forEach((t,i)=>{const div=document.createElement('div');div.className='task-item'+(t.done?' done':'');div.innerHTML=`<div class="task-check">${t.done?'✓':''}</div><div class="task-body"><div class="task-name">${t.name}</div><div class="task-reward">${t.reward}</div></div><span class="task-type">${t.done?'完成':'今日'}</span>`;if(!t.done)div.onclick=()=>completeTask(div,t,i);list.appendChild(div);});updateWallet();}
+function completeTask(el,t,i){DAILY_TASKS[i].done=true;el.classList.add('done');el.querySelector('.task-check').textContent='✓';el.querySelector('.task-type').textContent='完成';el.onclick=null;pearls+=t.pearl;updateWallet();el.style.background='#e1f5ee';setTimeout(()=>{el.style.background='';},800);}
+function updateWallet(){const pc=document.getElementById('pearlCount');if(pc)pc.textContent=pearls;document.querySelectorAll('.coin-pill').forEach((p,i)=>{if(i===0)p.textContent='🪙 '+pearls;});}
+function buildDolphinPicker(){const grid=document.getElementById('dolphinGrid');grid.innerHTML='';DOLPHINS.forEach((d,i)=>{if(i===4){const w=document.createElement('div');w.className='d-last';w.appendChild(makeDCard(d,i));grid.appendChild(w);}else{grid.appendChild(makeDCard(d,i));}});const rand=document.createElement('div');rand.className='d-card rand-card';rand.id='randCard';rand.innerHTML=`<div style="display:flex;align-items:center;gap:14px;"><div style="font-size:32px;flex-shrink:0;" id="randEmoji">🎲</div><div style="text-align:left;"><div style="font-size:14px;font-weight:700;color:var(--ink-soft)">隨機海豚</div><div style="font-size:11px;color:var(--ink-faint);margin-top:2px;">讓系統幫你選一位夥伴</div></div></div>`;rand.onclick=pickRandom;grid.appendChild(rand);}
+function makeDCard(d,i){const card=document.createElement('div');card.className='d-card'+(i===dolphinIdx?' selected':'');card.style.cssText=`border-color:${i===dolphinIdx?d.color:'transparent'};background:${d.bg};`;card.innerHTML=`<div class="d-emoji">🐬</div><div class="d-name" style="color:${d.color}">${d.full}</div><div class="d-role" style="color:${d.color}">${d.role}</div><div class="d-tag" style="background:${d.tagBg};color:${d.tagColor}">${d.name}</div>`;card.onclick=()=>selectDolphin(i);return card;}
+function pickRandom(){const card=document.getElementById('randCard'),emojis=['🎲','🐬','❓','🌀','✨'];let count=0;const iv=setInterval(()=>{document.getElementById('randEmoji').textContent=emojis[count%emojis.length];count++;if(count>=8){clearInterval(iv);const picked=Math.floor(Math.random()*DOLPHINS.length),d=DOLPHINS[picked];card.innerHTML=`<div style="display:flex;align-items:center;gap:14px;"><div style="font-size:32px;">🐬</div><div><div style="font-size:14px;font-weight:700;color:${d.color}">抽到了！${d.full}</div><div style="font-size:11px;color:var(--ink-faint);margin-top:2px;">${d.role}</div></div></div>`;card.style.borderColor=d.color;card.style.background=d.bg;setTimeout(()=>selectDolphin(picked),600);}},100);}
+function selectDolphin(i){dolphinIdx=i;chatMode='dolphin';document.querySelectorAll('.d-card').forEach((c,idx)=>{if(idx>=DOLPHINS.length)return;const d=DOLPHINS[idx];c.classList.toggle('selected',idx===i);c.style.borderColor=idx===i?d.color:'transparent';});setTimeout(()=>nav('s-chat'),220);}
+function startCompanionChat(idx){chatMode='companion';companionIdx=idx;nav('s-chat');}
+function initChat(){document.getElementById('chatMsgs').innerHTML='';chatRound=0;document.getElementById('sceneChips').style.display='flex';if(chatMode==='companion'){const c=COMPANIONS[companionIdx];document.getElementById('chatHeader').innerHTML=`<div class="d-ava" style="background:${c.avaBg}">${c.ava}</div><div style="flex:1;min-width:0;"><div class="d-chat-name" style="color:${c.color}">${c.name}</div><div class="d-chat-type" style="color:${c.color};opacity:.8">${c.bio}</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;margin-right:64px;"><div class="d-online">● 線上中</div><div class="companion-badge">🤝 認證陪伴者</div></div>`;setTimeout(()=>addMsg('bot',c.greeting,'human-bubble'),400);}else{const d=DOLPHINS[dolphinIdx];document.getElementById('chatHeader').innerHTML=`<div class="d-ava" style="background:${d.bg}">🐬</div><div style="flex:1;min-width:0;"><div class="d-chat-name" style="color:${d.color}">${d.name} <span style="font-size:11px;font-weight:400;color:var(--ink-faint)">${d.full}</span></div><div class="d-chat-type" style="color:${d.color};opacity:.7">${d.role}</div></div><div class="d-online" style="flex-shrink:0;margin-right:64px;">● 線上中</div>`;setTimeout(()=>addMsg('bot',d.greeting),400);}}
+function addMsg(role,text,extraClass=''){const box=document.getElementById('chatMsgs'),now=new Date();const t=`${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;const div=document.createElement('div');div.className=`msg ${role}`;div.innerHTML=`<div class="bubble ${extraClass}">${text}</div><div class="msg-time">${t}</div>`;box.appendChild(div);box.scrollTop=box.scrollHeight;}
+function showTyping(){const box=document.getElementById('chatMsgs'),div=document.createElement('div');div.id='typing';div.className='msg bot';div.innerHTML='<div class="typing"><span></span><span></span><span></span></div>';box.appendChild(div);box.scrollTop=box.scrollHeight;}
+function removeTyping(){const el=document.getElementById('typing');if(el)el.remove();}
+function pickScene(idx){scene=idx;document.getElementById('sceneChips').style.display='none';addMsg('me',CHAT_SCENE_LABELS[idx]);const opener=chatMode==='companion'?COMPANIONS[companionIdx].replies[0][idx%2]:DOLPHINS[dolphinIdx].openers[idx];const bubbleClass=chatMode==='companion'?'human-bubble':'';setTimeout(()=>{showTyping();setTimeout(()=>{removeTyping();addMsg('bot',opener,bubbleClass);chatRound=1;},1800);},300);}
+function sendMsg(){const inp=document.getElementById('chatIn'),txt=inp.value.trim();if(!txt)return;addMsg('me',txt);inp.value='';let rep,bubbleClass='';if(chatMode==='companion'){const c=COMPANIONS[companionIdx];const round=Math.min(Math.max(chatRound-1,0),c.replies.length-1);rep=c.replies[round][Math.floor(Math.random()*c.replies[round].length)];bubbleClass='human-bubble';}else{if(chatRound===0){rep=DOLPHINS[dolphinIdx].openers[scene];}else{const d=DOLPHINS[dolphinIdx];rep=d.replies[Math.min(chatRound-1,d.replies.length-1)];}}setTimeout(()=>{showTyping();setTimeout(()=>{removeTyping();addMsg('bot',rep,bubbleClass);chatRound++;},1600);},300);}
+function toDecision(){const sc=SCENARIOS[scene];document.getElementById('situTxt').textContent=sc.situ;buildChoices(sc);nav('s-decision');}
+function buildChoices(sc){const list=document.getElementById('choiceList');list.innerHTML='';document.getElementById('botComment').classList.remove('show');const d=DOLPHINS[dolphinIdx];sc.choices.forEach(c=>{const el=document.createElement('div');el.className='choice-item';el.onclick=()=>pickChoice(el,c);el.innerHTML=`<div class="choice-head"><div class="choice-letter">${c.l}</div><div class="choice-text">${c.t}</div>${c.rec?`<div class="rec-badge" style="background:${d.color}">推薦</div>`:''}</div><div class="choice-outcomes">${c.outs.map(o=>`<div class="out-row"><div class="out-label">${o.lb}</div><div class="bar-track"><div class="bar-fill ${o.cl}" data-p="${o.pct}"></div></div><div class="out-pct" style="color:var(${o.cl==='bar-g'?'--teal-mid':o.cl==='bar-a'?'--amber':'--coral'})">${o.pct}%</div></div>`).join('')}</div>`;list.appendChild(el);});}
+function pickChoice(el,c){const d=DOLPHINS[dolphinIdx];document.querySelectorAll('.choice-item').forEach(x=>{x.classList.remove('picked');x.querySelectorAll('.choice-letter').forEach(l=>{l.style.background='';l.style.color='';});});el.classList.add('picked');el.querySelectorAll('.choice-letter').forEach(l=>{l.style.background=d.color;l.style.color='white';});setTimeout(()=>{el.querySelectorAll('.bar-fill').forEach(b=>b.style.width=b.dataset.p+'%');},30);const bc=document.getElementById('botComment');bc.style.background=d.bg;document.getElementById('botCommentTxt').style.color=d.color;document.getElementById('botCommentTxt').textContent=c.tip;bc.classList.add('show');bc.scrollIntoView({behavior:'smooth',block:'nearest'});}
+function initChart(){const ctx=document.getElementById('moodChart');if(!ctx)return;if(chartInst)chartInst.destroy();chartInst=new Chart(ctx,{type:'line',data:{labels:['週一','週二','週三','週四','週五','週六','週日'],datasets:[{label:'班級平均心情',data:[3.8,3.5,3.2,3.0,3.4,3.7,3.6],borderColor:'#1d9e75',backgroundColor:'rgba(29,158,117,0.1)',borderWidth:2,pointRadius:4,pointBackgroundColor:'#1d9e75',fill:true,tension:0.4},{label:'焦慮指數',data:[2.1,2.4,2.8,3.1,2.9,2.3,2.2],borderColor:'#ba7517',backgroundColor:'rgba(186,117,23,0)',borderWidth:2,pointRadius:4,pointBackgroundColor:'#ba7517',fill:false,tension:0.4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'top',labels:{font:{size:11,family:'Noto Sans TC'},boxWidth:12,padding:12}}},scales:{y:{min:1,max:5,ticks:{font:{size:10},stepSize:1},grid:{color:'rgba(26,24,20,0.06)'}},x:{ticks:{font:{size:10}},grid:{display:false}}}}});}
+function initCompanion(){const list=document.getElementById('availTasks');if(!list)return;list.innerHTML='';COMPANION_TASKS.forEach((t,i)=>{const div=document.createElement('div');div.className='avail-task';div.innerHTML=`<div class="avail-task-icon">${t.icon}</div><div class="avail-task-info"><div class="avail-task-name">${t.name}</div><div class="avail-task-meta">${t.meta}</div></div><div style="text-align:right;flex-shrink:0;"><div style="font-size:12px;font-weight:700;color:var(--amber);margin-bottom:6px;">${t.reward}</div><button class="btn-accept" id="ct-${i}" onclick="acceptTask(${i})">接單</button></div>`;list.appendChild(div);});}
+function acceptTask(i){const btn=document.getElementById('ct-'+i);if(!btn||btn.classList.contains('done'))return;btn.textContent='已接單 ✓';btn.classList.add('done');}
+let recognition=null,isRec=false;
+function toggleVoice(){isRec?stopVoice():startVoice();}
+function startVoice(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){alert('您的瀏覽器不支援語音輸入。\n建議使用 Chrome 或 Edge 瀏覽器。');return;}if(!recognition){recognition=new SR();recognition.lang='zh-TW';recognition.continuous=false;recognition.interimResults=true;recognition.onresult=(e)=>{let interim='',final='';for(let i=e.resultIndex;i<e.results.length;i++){e.results[i].isFinal?(final+=e.results[i][0].transcript):(interim+=e.results[i][0].transcript);}const inp=document.getElementById('chatIn');inp.value=final||interim;if(!final&&interim)inp.placeholder=interim;};recognition.onspeechend=()=>recognition.stop();recognition.onend=()=>{isRec=false;recognition=null;setMicState(false);document.getElementById('chatIn').placeholder='說說你的感受...';const inp=document.getElementById('chatIn');if(inp.value.trim())setTimeout(sendMsg,300);};recognition.onerror=(e)=>{isRec=false;recognition=null;setMicState(false);document.getElementById('chatIn').placeholder='說說你的感受...';if(e.error==='not-allowed')alert('請在瀏覽器允許麥克風權限後再試。');};}try{recognition.start();isRec=true;setMicState(true);document.getElementById('chatIn').value='';document.getElementById('chatIn').placeholder='🎤 聆聽中，請說話...';}catch(e){}}
+function stopVoice(){if(recognition){try{recognition.stop();}catch(e){}}isRec=false;setMicState(false);document.getElementById('chatIn').placeholder='說說你的感受...';}
+function setMicState(on){const btn=document.getElementById('micBtn'),inp=document.getElementById('chatIn');if(!btn)return;btn.classList.toggle('rec',on);inp.classList.toggle('rec-active',on);btn.title=on?'點擊停止錄音':'語音輸入';btn.textContent=on?'⏹':'🎤';}
+const DAYS=['一','二','三','四','五','六','日'];
+const MCOLORS={0:'var(--paper)',1:'var(--coral)',2:'var(--coral)',3:'var(--amber)',4:'var(--teal-mid)',5:'var(--teal)'};
+function openSheet(name,note,data){document.getElementById('shTitle').textContent=name+' 的本週概況';document.getElementById('shNote').textContent='📝 '+note;const bars=document.getElementById('miniBars'),labels=document.getElementById('miniLabels');bars.innerHTML='';labels.innerHTML='';data.forEach((v,i)=>{const pct=v===0?0:Math.max(8,(v/5)*100);bars.innerHTML+=`<div class="mb" style="height:${pct}%;background:${MCOLORS[v]||'var(--paper2)'}"></div>`;labels.innerHTML+=`<div class="mb-label">${DAYS[i]}</div>`;});document.getElementById('overlay').classList.add('show');}
+function closeSheet(e){if(!e||e.target===document.getElementById('overlay')||e.target.classList.contains('btn-close'))document.getElementById('overlay').classList.remove('show');}
+const FAREWELLS={dolphin:[{emoji:'🧠',msg:'每一次思考，都是成長的種子',sub:'下次遇到困難，記得來找我！ 🌱'},{emoji:'💙',msg:'你值得被好好愛護',sub:'今天能說出來，就已經很勇敢了 💙'},{emoji:'🔥',msg:'你比你想像的更有力量',sub:'相信自己，每一步都算數。加油！ 🦁'},{emoji:'🤗',msg:'照顧好自己是最重要的事',sub:'有需要隨時回來找我 🌊'},{emoji:'💜',msg:'你的存在讓這個世界更美好',sub:'謝謝你今天的分享，下次見 💜'}],companion:[{emoji:'😊',msg:'謝謝你今天願意跟我分享',sub:'我很開心認識你，隨時回來找我聊！'},{emoji:'🌸',msg:'你說的每一句話都很有價值',sub:'好好休息，明天會更好 🌸'},{emoji:'🎯',msg:'你已經有了很清晰的方向',sub:'相信自己，你做得到！ 💪'}]};
+function endChat(){let farewell,name;if(chatMode==='companion'){const msgs=FAREWELLS.companion;farewell=msgs[companionIdx%msgs.length];name=COMPANIONS[companionIdx].name;}else{farewell=FAREWELLS.dolphin[dolphinIdx];name=DOLPHINS[dolphinIdx].name;}document.getElementById('fwAva').textContent=farewell.emoji;document.getElementById('fwName').textContent='來自 '+name+' 的話';document.getElementById('fwMsg').textContent=farewell.msg;document.getElementById('fwSub').textContent=farewell.sub;document.getElementById('farewellOverlay').classList.add('show');}
+function closeFarewell(){document.getElementById('farewellOverlay').classList.remove('show');setSimBtn(false);document.querySelectorAll('.screen').forEach(s=>s.className='screen offLeft');const home=document.getElementById('s-home');home.classList.remove('offLeft');home.classList.add('active');stack=['s-splash','s-home'];cur='s-home';updateHeader('s-home');}
+</script>
+
+<button class="float-sim-btn" id="floatSimBtn" style="display:none" onclick="toDecision()">🔮 模擬器</button>
+
+<div class="farewell-overlay" id="farewellOverlay">
+  <div class="farewell-card">
+    <div class="farewell-ava" id="fwAva">💙</div>
+    <div style="font-size:11px;color:var(--ink-faint);margin-bottom:12px;font-weight:600;letter-spacing:.5px;" id="fwName">來自海豚的話</div>
+    <div class="farewell-msg" id="fwMsg"></div>
+    <div class="farewell-sub" id="fwSub"></div>
+    <button class="btn-farewell-home" onclick="closeFarewell()">🏠 回到首頁</button>
+  </div>
+</div>
+</body>
+</html>

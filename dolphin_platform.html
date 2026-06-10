@@ -1,0 +1,1628 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>海豚交友系統｜平台模擬器</title>
+  <style>
+    :root {
+      --ink: #142235;
+      --muted: #607086;
+      --faint: #8a98aa;
+      --line: rgba(20, 34, 53, .12);
+      --paper: #f7fbfc;
+      --panel: #ffffff;
+      --soft: #eef6f8;
+      --teal: #157c89;
+      --teal-2: #29a1ad;
+      --blue: #246db5;
+      --green: #2d8b67;
+      --amber: #b97922;
+      --coral: #c9574f;
+      --violet: #6654b9;
+      --shadow: 0 18px 42px rgba(20, 34, 53, .10);
+      --r: 8px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", Arial, sans-serif;
+      letter-spacing: 0;
+    }
+
+    button, input, select, textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr);
+    }
+
+    .side {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 22px 16px;
+      background: #102c3a;
+      color: #edf8fb;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px;
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      border-radius: var(--r);
+      display: grid;
+      place-items: center;
+      background: #dff7fb;
+      color: #0f6873;
+      font-weight: 900;
+      font-size: 20px;
+    }
+
+    .brand-name {
+      font-size: 16px;
+      font-weight: 800;
+      line-height: 1.35;
+    }
+
+    .brand-sub {
+      margin-top: 2px;
+      color: rgba(237, 248, 251, .64);
+      font-size: 12px;
+    }
+
+    .nav {
+      display: grid;
+      gap: 6px;
+    }
+
+    .nav button {
+      min-height: 42px;
+      border: 0;
+      border-radius: var(--r);
+      color: rgba(237, 248, 251, .72);
+      background: transparent;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 12px;
+      text-align: left;
+      transition: .18s ease;
+    }
+
+    .nav button:hover,
+    .nav button.active {
+      color: #fff;
+      background: rgba(255, 255, 255, .12);
+    }
+
+    .nav-icon {
+      width: 22px;
+      height: 22px;
+      display: grid;
+      place-items: center;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, .11);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .side-card {
+      margin-top: auto;
+      padding: 14px;
+      border-radius: var(--r);
+      background: rgba(255, 255, 255, .10);
+      border: 1px solid rgba(255, 255, 255, .12);
+    }
+
+    .side-card strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+
+    .side-card p {
+      margin: 0;
+      color: rgba(237, 248, 251, .68);
+      font-size: 12px;
+      line-height: 1.65;
+    }
+
+    main {
+      min-width: 0;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      height: 66px;
+      padding: 0 28px;
+      background: rgba(247, 251, 252, .88);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .topbar h1 {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.25;
+    }
+
+    .topbar .status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #35b779;
+      box-shadow: 0 0 0 4px rgba(53, 183, 121, .14);
+    }
+
+    .action-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .btn {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: var(--r);
+      background: var(--panel);
+      color: var(--ink);
+      padding: 0 14px;
+      font-weight: 700;
+      transition: .16s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 24px rgba(20, 34, 53, .12);
+    }
+
+    .btn.primary {
+      border-color: #117a86;
+      background: #117a86;
+      color: #fff;
+    }
+
+    .btn.ghost {
+      background: transparent;
+    }
+
+    .content {
+      padding: 28px;
+      display: grid;
+      gap: 26px;
+    }
+
+    .section {
+      scroll-margin-top: 86px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 16px;
+    }
+
+    .eyebrow {
+      margin: 0 0 6px;
+      color: var(--teal);
+      font-weight: 800;
+      font-size: 12px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 28px;
+      line-height: 1.25;
+    }
+
+    .lead {
+      margin: 8px 0 0;
+      color: var(--muted);
+      line-height: 1.8;
+      max-width: 800px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .grid.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid.cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--r);
+      box-shadow: var(--shadow);
+    }
+
+    .panel.pad {
+      padding: 20px;
+    }
+
+    .hero {
+      min-height: calc(100vh - 122px);
+      display: grid;
+      grid-template-columns: minmax(0, 1.04fr) minmax(360px, .96fr);
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .hero-stage {
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--r);
+      min-height: 560px;
+      background: #0d4152;
+      color: #fff;
+      display: flex;
+      align-items: end;
+    }
+
+    .hero-stage img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: .34;
+    }
+
+    .hero-stage::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(13, 65, 82, .12), rgba(13, 65, 82, .88));
+    }
+
+    .hero-copy {
+      position: relative;
+      z-index: 2;
+      padding: 34px;
+      max-width: 760px;
+    }
+
+    .hero-copy h2 {
+      font-size: clamp(34px, 5vw, 64px);
+      color: #fff;
+      letter-spacing: 0;
+    }
+
+    .hero-copy p {
+      margin: 16px 0 24px;
+      color: rgba(255, 255, 255, .82);
+      font-size: 17px;
+      line-height: 1.85;
+    }
+
+    .hero-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .hero-metric {
+      padding: 13px;
+      border-radius: var(--r);
+      background: rgba(255, 255, 255, .13);
+      border: 1px solid rgba(255, 255, 255, .16);
+    }
+
+    .hero-metric strong {
+      display: block;
+      font-size: 22px;
+    }
+
+    .hero-metric span {
+      display: block;
+      margin-top: 3px;
+      color: rgba(255, 255, 255, .72);
+      font-size: 12px;
+    }
+
+    .sim-card {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      min-height: 560px;
+      overflow: hidden;
+    }
+
+    .sim-head {
+      padding: 18px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .sim-head strong {
+      font-size: 16px;
+    }
+
+    .seg {
+      display: inline-grid;
+      grid-auto-flow: column;
+      gap: 4px;
+      padding: 4px;
+      border: 1px solid var(--line);
+      border-radius: var(--r);
+      background: var(--soft);
+    }
+
+    .seg button {
+      min-height: 30px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--muted);
+      padding: 0 10px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .seg button.active {
+      color: var(--ink);
+      background: #fff;
+      box-shadow: 0 3px 10px rgba(20, 34, 53, .08);
+    }
+
+    .sim-body {
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+      align-content: start;
+      background: linear-gradient(180deg, #fff, #f3fafb);
+    }
+
+    .persona {
+      display: grid;
+      grid-template-columns: 48px minmax(0, 1fr);
+      gap: 12px;
+      align-items: center;
+    }
+
+    .avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--r);
+      display: grid;
+      place-items: center;
+      background: #dff7fb;
+      color: #117a86;
+      font-size: 22px;
+      font-weight: 900;
+    }
+
+    .persona strong {
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    .persona span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .chat {
+      display: grid;
+      gap: 10px;
+      max-height: 290px;
+      overflow-y: auto;
+      padding-right: 3px;
+    }
+
+    .bubble {
+      width: fit-content;
+      max-width: 88%;
+      padding: 12px 13px;
+      border-radius: var(--r);
+      font-size: 13px;
+      line-height: 1.65;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .bubble.user {
+      justify-self: end;
+      background: #137d8a;
+      color: #fff;
+      border-color: #137d8a;
+    }
+
+    .scenario-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .scenario {
+      border: 1px solid var(--line);
+      border-radius: var(--r);
+      background: #fff;
+      padding: 11px;
+      text-align: left;
+      color: var(--ink);
+      line-height: 1.5;
+    }
+
+    .scenario.active {
+      border-color: rgba(19, 125, 138, .55);
+      background: #ecfbfd;
+    }
+
+    .sim-foot {
+      padding: 16px 18px;
+      border-top: 1px solid var(--line);
+      background: #fff;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .kpi {
+      padding: 18px;
+      min-height: 132px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .kpi span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .kpi strong {
+      font-size: 30px;
+      line-height: 1;
+    }
+
+    .kpi small {
+      color: var(--green);
+      font-weight: 800;
+    }
+
+    .module-card {
+      padding: 20px;
+      display: grid;
+      gap: 14px;
+      min-height: 220px;
+    }
+
+    .module-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: start;
+    }
+
+    .module-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: var(--r);
+      background: var(--soft);
+      display: grid;
+      place-items: center;
+      color: var(--teal);
+      font-weight: 900;
+    }
+
+    .module-card h3 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .module-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 14px;
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-self: end;
+    }
+
+    .tag {
+      border-radius: 999px;
+      padding: 5px 9px;
+      background: var(--soft);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .journey {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .step {
+      position: relative;
+      padding: 16px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--r);
+      min-height: 160px;
+    }
+
+    .step b {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      border-radius: 6px;
+      background: #dff7fb;
+      color: #0f6873;
+      margin-bottom: 12px;
+    }
+
+    .step strong {
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .step span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .decision-layout {
+      display: grid;
+      grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+      gap: 16px;
+    }
+
+    .choice-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .choice {
+      border: 1px solid var(--line);
+      border-radius: var(--r);
+      background: #fff;
+      padding: 14px;
+      text-align: left;
+      color: var(--ink);
+    }
+
+    .choice.selected {
+      border-color: rgba(19, 125, 138, .55);
+      background: #ecfbfd;
+    }
+
+    .choice strong {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .choice span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .bar-set {
+      display: grid;
+      gap: 14px;
+    }
+
+    .bar-row {
+      display: grid;
+      gap: 6px;
+    }
+
+    .bar-label {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .track {
+      height: 10px;
+      border-radius: 999px;
+      background: #e8eef2;
+      overflow: hidden;
+    }
+
+    .fill {
+      height: 100%;
+      width: var(--w);
+      border-radius: inherit;
+      background: var(--teal-2);
+      transition: width .4s ease;
+    }
+
+    .fill.amber { background: var(--amber); }
+    .fill.coral { background: var(--coral); }
+    .fill.green { background: var(--green); }
+
+    .note {
+      padding: 14px;
+      border-radius: var(--r);
+      background: #eef9f7;
+      color: #245b51;
+      line-height: 1.7;
+      font-size: 14px;
+      border: 1px solid rgba(45, 139, 103, .18);
+    }
+
+    .school-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(300px, .8fr);
+      gap: 16px;
+    }
+
+    .heatmap {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+    }
+
+    .day {
+      min-height: 86px;
+      padding: 10px;
+      border-radius: var(--r);
+      background: #eef6f8;
+      display: grid;
+      align-content: space-between;
+      border: 1px solid var(--line);
+    }
+
+    .day.risk { background: #fff2f1; border-color: rgba(201, 87, 79, .22); }
+    .day.warn { background: #fff8ed; border-color: rgba(185, 121, 34, .22); }
+    .day.good { background: #edf9f4; border-color: rgba(45, 139, 103, .22); }
+
+    .day strong { font-size: 13px; }
+    .day span { font-size: 22px; font-weight: 900; }
+    .day small { color: var(--muted); }
+
+    .alert-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .alert {
+      padding: 13px;
+      border-radius: var(--r);
+      border: 1px solid var(--line);
+      display: grid;
+      gap: 4px;
+      background: #fff;
+    }
+
+    .alert.high { border-left: 4px solid var(--coral); }
+    .alert.mid { border-left: 4px solid var(--amber); }
+    .alert.low { border-left: 4px solid var(--green); }
+    .alert strong { font-size: 14px; }
+    .alert span { color: var(--muted); font-size: 13px; line-height: 1.55; }
+
+    .task-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .task {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      padding: 14px;
+      border-radius: var(--r);
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .task strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .task span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .mini-btn {
+      min-height: 32px;
+      border: 1px solid rgba(19, 125, 138, .32);
+      border-radius: 6px;
+      background: #edf9fb;
+      color: #117a86;
+      padding: 0 10px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .mini-btn.done {
+      border-color: rgba(45, 139, 103, .26);
+      background: #ecf8f2;
+      color: var(--green);
+    }
+
+    .investor {
+      display: grid;
+      grid-template-columns: minmax(330px, .8fr) minmax(0, 1.2fr);
+      gap: 16px;
+    }
+
+    .control {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .control label {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    input[type="range"] {
+      accent-color: var(--teal);
+      width: 100%;
+    }
+
+    .money-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .money {
+      padding: 16px;
+      border-radius: var(--r);
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .money span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+
+    .money strong {
+      font-size: 24px;
+    }
+
+    .timeline {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .phase {
+      padding: 18px;
+      border-radius: var(--r);
+      background: #fff;
+      border: 1px solid var(--line);
+      display: grid;
+      gap: 12px;
+    }
+
+    .phase h3 {
+      margin: 0;
+      font-size: 17px;
+    }
+
+    .phase ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      line-height: 1.75;
+      font-size: 14px;
+    }
+
+    .asset-strip {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .asset {
+      overflow: hidden;
+      min-height: 170px;
+    }
+
+    .asset img {
+      width: 100%;
+      height: 132px;
+      object-fit: cover;
+      display: block;
+      background: #d7e8ee;
+    }
+
+    .asset span {
+      display: block;
+      padding: 10px 12px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .footer-band {
+      padding: 24px;
+      border-radius: var(--r);
+      color: #fff;
+      background: #102c3a;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .footer-band h2 {
+      color: #fff;
+      font-size: 24px;
+    }
+
+    .footer-band p {
+      margin: 6px 0 0;
+      color: rgba(255, 255, 255, .72);
+      line-height: 1.7;
+    }
+
+    .mobile-menu {
+      display: none;
+    }
+
+    @media (max-width: 1180px) {
+      .hero,
+      .decision-layout,
+      .school-layout,
+      .investor {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-stage,
+      .sim-card {
+        min-height: auto;
+      }
+
+      .journey {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .grid.cols-4,
+      .asset-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 860px) {
+      .shell {
+        grid-template-columns: 1fr;
+      }
+
+      .side {
+        position: fixed;
+        inset: auto 12px 12px 12px;
+        z-index: 80;
+        height: auto;
+        padding: 8px;
+        border-radius: 14px;
+        flex-direction: row;
+        align-items: center;
+        box-shadow: 0 18px 40px rgba(16, 44, 58, .28);
+      }
+
+      .brand,
+      .side-card {
+        display: none;
+      }
+
+      .nav {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        width: 100%;
+        gap: 4px;
+      }
+
+      .nav button {
+        min-height: 48px;
+        padding: 0;
+        justify-content: center;
+      }
+
+      .nav button span:not(.nav-icon) {
+        display: none;
+      }
+
+      .topbar {
+        height: auto;
+        min-height: 64px;
+        padding: 14px 16px;
+        align-items: start;
+      }
+
+      .topbar .status {
+        display: none;
+      }
+
+      .content {
+        padding: 18px 16px 92px;
+      }
+
+      .hero-copy {
+        padding: 24px;
+      }
+
+      .hero-metrics,
+      .grid.cols-2,
+      .grid.cols-3,
+      .grid.cols-4,
+      .money-grid,
+      .timeline,
+      .asset-strip {
+        grid-template-columns: 1fr;
+      }
+
+      .journey {
+        grid-template-columns: 1fr;
+      }
+
+      .heatmap {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      h2 {
+        font-size: 24px;
+      }
+
+      .section-head,
+      .footer-band {
+        align-items: start;
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="side">
+      <div class="brand">
+        <div class="brand-mark">D</div>
+        <div>
+          <div class="brand-name">海豚交友系統</div>
+          <div class="brand-sub">AI 陪伴與決策孿生平台</div>
+        </div>
+      </div>
+
+      <nav class="nav" aria-label="平台導覽">
+        <button class="active" data-go="overview"><span class="nav-icon">01</span><span>總覽</span></button>
+        <button data-go="product"><span class="nav-icon">02</span><span>產品模組</span></button>
+        <button data-go="simulator"><span class="nav-icon">03</span><span>決策模擬</span></button>
+        <button data-go="school"><span class="nav-icon">04</span><span>學校端</span></button>
+        <button data-go="companion"><span class="nav-icon">05</span><span>陪伴者</span></button>
+        <button data-go="investor"><span class="nav-icon">06</span><span>投資模型</span></button>
+        <button data-go="launch"><span class="nav-icon">07</span><span>上線計畫</span></button>
+      </nav>
+
+      <div class="side-card">
+        <strong>展示定位</strong>
+        <p>這是一個投資方與合作學校可操作的平台模擬器，資料為示範用，正式上線前需接入會員、資料庫、AI API 與安全機制。</p>
+      </div>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <div>
+          <h1>平台模擬器控制台</h1>
+          <div class="status"><span class="dot"></span><span>Demo 可展示｜靜態版本可直接部署</span></div>
+        </div>
+        <div class="action-row">
+          <a class="btn ghost" href="dolphin_demo.html" target="_blank" rel="noreferrer">開啟原互動 Demo</a>
+          <a class="btn primary" href="#investor">查看投資模型</a>
+        </div>
+      </header>
+
+      <div class="content">
+        <section class="section hero" id="overview">
+          <div class="hero-stage">
+            <img src="第一概念圖.jpg" alt="海豚交友系統概念視覺">
+            <div class="hero-copy">
+              <p class="eyebrow">INVESTOR DEMO PLATFORM</p>
+              <h2>把情緒陪伴、社交決策與校園預警整合成一個可擴張平台</h2>
+              <p>用戶端負責陪伴與決策模擬，陪伴者端建立供給生態，學校端提供可付費的班級情緒洞察；投資方可以直接看到成長、收入與 MVP 路線。</p>
+              <div class="action-row">
+                <a class="btn primary" href="#simulator">開始 3 分鐘展示</a>
+                <a class="btn" href="#launch">上線路線</a>
+              </div>
+              <div class="hero-metrics">
+                <div class="hero-metric"><strong>4</strong><span>核心角色入口</span></div>
+                <div class="hero-metric"><strong>5</strong><span>AI 決策視角</span></div>
+                <div class="hero-metric"><strong>3</strong><span>可收費市場</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel sim-card" aria-label="快速體驗模擬">
+            <div class="sim-head">
+              <strong>快速體驗</strong>
+              <div class="seg" id="roleSeg">
+                <button class="active" data-role="user">用戶</button>
+                <button data-role="school">學校</button>
+                <button data-role="partner">陪伴者</button>
+              </div>
+            </div>
+            <div class="sim-body">
+              <div class="persona">
+                <div class="avatar" id="roleAvatar">用</div>
+                <div>
+                  <strong id="roleTitle">一般用戶入口</strong>
+                  <span id="roleDesc">選擇情緒情境，AI 海豚會陪伴對話並引導到決策模擬。</span>
+                </div>
+              </div>
+              <div class="chat" id="quickChat"></div>
+              <div class="scenario-list" id="quickScenarios"></div>
+            </div>
+            <div class="sim-foot">
+              <button class="btn primary" id="quickNext">產生下一步建議</button>
+              <button class="btn" id="quickReset">重置體驗</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="product">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">PRODUCT MODULES</p>
+              <h2>先做出可被理解的四個產品面</h2>
+              <p class="lead">投資方不只看功能，也看平台能不能形成供需與付費閉環。這四個模組剛好對應 B2C、B2B、供給端與資料價值。</p>
+            </div>
+          </div>
+
+          <div class="grid cols-4">
+            <article class="panel module-card">
+              <div class="module-top">
+                <div>
+                  <h3>用戶陪伴 App</h3>
+                  <p>情緒地圖、AI 海豚聊天、社交任務、決策模擬與陪伴者配對。</p>
+                </div>
+                <div class="module-icon">U</div>
+              </div>
+              <div class="tag-row">
+                <span class="tag">訂閱</span><span class="tag">留存</span><span class="tag">成長任務</span>
+              </div>
+            </article>
+
+            <article class="panel module-card">
+              <div class="module-top">
+                <div>
+                  <h3>陪伴者中心</h3>
+                  <p>陪伴任務、認證課程、服務評分、收益紀錄，形成可管理的供給端。</p>
+                </div>
+                <div class="module-icon">P</div>
+              </div>
+              <div class="tag-row">
+                <span class="tag">認證</span><span class="tag">接單</span><span class="tag">抽成</span>
+              </div>
+            </article>
+
+            <article class="panel module-card">
+              <div class="module-top">
+                <div>
+                  <h3>學校儀表板</h3>
+                  <p>班級情緒趨勢、社交孤立預警、輔導追蹤與匿名化報告。</p>
+                </div>
+                <div class="module-icon">S</div>
+              </div>
+              <div class="tag-row">
+                <span class="tag">校園訂閱</span><span class="tag">SEL</span><span class="tag">預警</span>
+              </div>
+            </article>
+
+            <article class="panel module-card">
+              <div class="module-top">
+                <div>
+                  <h3>決策孿生引擎</h3>
+                  <p>把個人情緒、關係狀態與選擇結果建模，輸出多視角建議。</p>
+                </div>
+                <div class="module-icon">AI</div>
+              </div>
+              <div class="tag-row">
+                <span class="tag">差異化</span><span class="tag">資料壁壘</span><span class="tag">API</span>
+              </div>
+            </article>
+          </div>
+
+          <div class="journey">
+            <div class="step"><b>1</b><strong>情緒輸入</strong><span>用戶記錄心情、選擇困擾情境或直接對話。</span></div>
+            <div class="step"><b>2</b><strong>人格陪伴</strong><span>系統依照狀態分派理性、情緒、勇氣、安全或社交視角。</span></div>
+            <div class="step"><b>3</b><strong>決策模擬</strong><span>比較不同做法的關係修復、風險與長期影響。</span></div>
+            <div class="step"><b>4</b><strong>人類陪伴</strong><span>必要時轉接認證陪伴者，處理更長的支持需求。</span></div>
+            <div class="step"><b>5</b><strong>匿名洞察</strong><span>學校端取得趨勢與預警，不揭露個人敏感內容。</span></div>
+          </div>
+        </section>
+
+        <section class="section" id="simulator">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">DECISION SIMULATOR</p>
+              <h2>投資方可操作的決策模擬器</h2>
+              <p class="lead">這段是展示核心差異化：不只是聊天，而是把情境轉換成選項、風險、建議與後續任務。</p>
+            </div>
+          </div>
+
+          <div class="decision-layout">
+            <div class="panel pad">
+              <h3>選擇展示情境</h3>
+              <p class="lead">投資簡報時建議先選校園人際案例，最容易讓學校、家長與投資方理解。</p>
+              <div class="choice-list" id="caseList"></div>
+            </div>
+
+            <div class="panel pad">
+              <div class="persona">
+                <div class="avatar">D</div>
+                <div>
+                  <strong id="caseTitle">朋友誤會與冷戰</strong>
+                  <span id="caseIntro">系統會生成三個可行選擇，並用決策孿生模型預估結果。</span>
+                </div>
+              </div>
+              <div class="choice-list" id="decisionChoices"></div>
+              <div class="bar-set" id="resultBars"></div>
+              <div class="note" id="decisionNote">建議先採取低風險的主動溝通，並保留求助大人的備援選項。</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="school">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">SCHOOL DASHBOARD</p>
+              <h2>學校端讓商業模式變得清楚</h2>
+              <p class="lead">B2B 校園訂閱是早期最容易被驗證的收入來源。展示時重點不是監控學生，而是匿名化趨勢、輔導資源分配與及早介入。</p>
+            </div>
+          </div>
+
+          <div class="grid cols-4">
+            <div class="panel kpi"><span>本週情緒紀錄</span><strong>1,248</strong><small>較上週 +18%</small></div>
+            <div class="panel kpi"><span>需關注學生</span><strong>23</strong><small style="color: var(--amber)">中高風險</small></div>
+            <div class="panel kpi"><span>輔導回應率</span><strong>84%</strong><small>較上月 +9%</small></div>
+            <div class="panel kpi"><span>匿名求助轉介</span><strong>67</strong><small>已分流處理</small></div>
+          </div>
+
+          <div class="school-layout">
+            <div class="panel pad">
+              <h3>七日班級情緒熱區</h3>
+              <div class="heatmap">
+                <div class="day good"><strong>週一</strong><span>4.1</span><small>穩定</small></div>
+                <div class="day good"><strong>週二</strong><span>3.9</span><small>穩定</small></div>
+                <div class="day warn"><strong>週三</strong><span>3.2</span><small>壓力升高</small></div>
+                <div class="day risk"><strong>週四</strong><span>2.8</span><small>人際事件</small></div>
+                <div class="day warn"><strong>週五</strong><span>3.3</span><small>需追蹤</small></div>
+                <div class="day good"><strong>週六</strong><span>3.8</span><small>恢復</small></div>
+                <div class="day good"><strong>週日</strong><span>4.0</span><small>恢復</small></div>
+              </div>
+            </div>
+
+            <div class="panel pad">
+              <h3>本週預警摘要</h3>
+              <div class="alert-list">
+                <div class="alert high"><strong>社交孤立風險升高</strong><span>8 位學生連續三日出現午餐孤立、低互動與求助訊號。</span></div>
+                <div class="alert mid"><strong>考前焦慮群聚</strong><span>二年級焦慮指數較平時上升 31%，建議安排班級舒壓活動。</span></div>
+                <div class="alert low"><strong>同儕支持有效</strong><span>陪伴者介入後，完成決策任務的學生回訪分數提升。</span></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="companion">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">COMPANION NETWORK</p>
+              <h2>陪伴者中心把服務供給管理起來</h2>
+              <p class="lead">平台要能上線，不能只靠 AI。認證陪伴者可以承接非危機型陪伴需求，平台保留審核、分級、評分與轉介機制。</p>
+            </div>
+          </div>
+
+          <div class="grid cols-3">
+            <div class="panel kpi"><span>認證陪伴者</span><strong>126</strong><small>金級 18 位</small></div>
+            <div class="panel kpi"><span>平均回覆時間</span><strong>4.8m</strong><small>尖峰時段</small></div>
+            <div class="panel kpi"><span>本月服務收入</span><strong>NT$ 286K</strong><small>平台抽成 22%</small></div>
+          </div>
+
+          <div class="panel pad">
+            <h3>示範任務池</h3>
+            <div class="task-list" id="taskList"></div>
+          </div>
+        </section>
+
+        <section class="section" id="investor">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">INVESTOR MODEL</p>
+              <h2>投資方會問的收入模擬</h2>
+              <p class="lead">這裡用簡化模型說明：校園訂閱是底盤，個人訂閱是成長，陪伴服務抽成是高頻收入。數字可在簡報現場調整。</p>
+            </div>
+          </div>
+
+          <div class="investor">
+            <div class="panel pad">
+              <div class="control">
+                <label>合作學校數 <b><span id="schoolsVal">20</span> 校</b></label>
+                <input id="schools" type="range" min="5" max="120" value="20">
+              </div>
+              <div class="control">
+                <label>平均每校學生 <b><span id="studentsVal">600</span> 人</b></label>
+                <input id="students" type="range" min="200" max="2000" step="50" value="600">
+              </div>
+              <div class="control">
+                <label>個人付費轉換 <b><span id="conversionVal">6</span>%</b></label>
+                <input id="conversion" type="range" min="2" max="18" value="6">
+              </div>
+              <div class="control">
+                <label>訂閱月費 <b>NT$ <span id="arpuVal">149</span></b></label>
+                <input id="arpu" type="range" min="79" max="399" step="10" value="149">
+              </div>
+            </div>
+
+            <div class="panel pad">
+              <h3>月收入模擬</h3>
+              <div class="money-grid">
+                <div class="money"><span>校園 SaaS</span><strong id="schoolRevenue">NT$ 400K</strong></div>
+                <div class="money"><span>個人訂閱</span><strong id="subRevenue">NT$ 107K</strong></div>
+                <div class="money"><span>陪伴抽成</span><strong id="serviceRevenue">NT$ 58K</strong></div>
+                <div class="money"><span>月經常收入</span><strong id="mrr">NT$ 565K</strong></div>
+                <div class="money"><span>年化收入</span><strong id="arr">NT$ 6.78M</strong></div>
+                <div class="money"><span>可服務用戶</span><strong id="users">12K</strong></div>
+              </div>
+              <div class="note" style="margin-top: 14px;">投資展示時可把這個區塊當成「假設調整器」，現場依照投資方問題調整學校數、學生數、付費率與月費。</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="launch">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">LAUNCH ROADMAP</p>
+              <h2>從展示原型到可上線產品</h2>
+              <p class="lead">建議先用此靜態模擬器拿回饋，再用 8 到 12 週做封閉 MVP，最後才進入正式商業化。</p>
+            </div>
+          </div>
+
+          <div class="timeline">
+            <div class="phase">
+              <h3>第 1 階段｜投資展示</h3>
+              <ul>
+                <li>整理 Demo 路線與投資敘事</li>
+                <li>用假資料展示完整平台閉環</li>
+                <li>收集投資方與校方回饋</li>
+              </ul>
+            </div>
+            <div class="phase">
+              <h3>第 2 階段｜封閉 MVP</h3>
+              <ul>
+                <li>建立會員、聊天、情緒紀錄與教師端</li>
+                <li>串接 AI API 與資料庫</li>
+                <li>導入 1 到 3 所學校試點</li>
+              </ul>
+            </div>
+            <div class="phase">
+              <h3>第 3 階段｜正式上線</h3>
+              <ul>
+                <li>完成隱私、未成年與危機轉介流程</li>
+                <li>陪伴者認證與營運後台</li>
+                <li>啟動 B2B 與 B2C 收費</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="asset-strip">
+            <div class="panel asset"><img src="第二概念圖.jpg" alt="概念圖二"><span>品牌視覺素材</span></div>
+            <div class="panel asset"><img src="第三概念圖.png" alt="概念圖三"><span>產品情境素材</span></div>
+            <div class="panel asset"><img src="第四概念圖.png" alt="概念圖四"><span>平台架構素材</span></div>
+            <div class="panel asset"><img src="第六概念圖.png" alt="概念圖六"><span>投資簡報素材</span></div>
+          </div>
+
+          <div class="footer-band">
+            <div>
+              <h2>下一步：把模擬器變成真正 MVP</h2>
+              <p>正式上線版本需要後端、資料庫、登入、AI 服務、權限控管、危機通報與個資保護。這個平台檔案先負責讓故事被看見、被理解、被投資。</p>
+            </div>
+            <div class="action-row">
+              <a class="btn primary" href="dolphin_decision_twin.html" target="_blank" rel="noreferrer">查看決策孿生說明</a>
+              <a class="btn" href="海豚交友系統_簡報說明.pptx">下載既有簡報</a>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const navButtons = document.querySelectorAll(".nav button");
+    navButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        document.getElementById(button.dataset.go).scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
+
+    const sections = [...document.querySelectorAll(".section")];
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        navButtons.forEach((button) => {
+          button.classList.toggle("active", button.dataset.go === entry.target.id);
+        });
+      });
+    }, { rootMargin: "-35% 0px -55% 0px", threshold: 0.01 });
+    sections.forEach((section) => observer.observe(section));
+
+    const roleData = {
+      user: {
+        avatar: "用",
+        title: "一般用戶入口",
+        desc: "選擇情緒情境，AI 海豚會先接住感受，再釐清需求與風險，最後引導到決策模擬。",
+        messages: [
+          ["bot", "今天想先處理哪一種狀況？你可以只說最卡住的那一段，我會陪你把情緒、關係和下一步分開整理。"],
+          ["user", "我跟朋友冷戰三天，很怕主動說話會更尷尬。"]
+        ],
+        scenarios: ["朋友誤會與冷戰", "被同學排除在群組外", "朋友要求借作業抄"],
+        next: "系統建議：先用低壓訊息表達在乎，不急著爭對錯；再進入決策模擬比較主動溝通、等待、第三方協調的結果。"
+      },
+      school: {
+        avatar: "校",
+        title: "學校端入口",
+        desc: "班級匿名趨勢、預警摘要與輔導資源分配，適合 B2B 付費展示。",
+        messages: [
+          ["bot", "本週二年級社交孤立訊號上升，系統建議先做匿名趨勢確認，再安排導師關懷與小團體活動。"],
+          ["user", "請幫我列出最需要關注的班級。"]
+        ],
+        scenarios: ["班級情緒趨勢", "孤立風險預警", "輔導資源排程"],
+        next: "系統建議：優先介入二年三班與一年五班；僅提供匿名化趨勢給班級端，個案內容需經輔導流程與權限控管。"
+      },
+      partner: {
+        avatar: "陪",
+        title: "陪伴者入口",
+        desc: "認證陪伴者接任務、完成服務、累積評分與收益，並依風險等級轉介專業支持。",
+        messages: [
+          ["bot", "你目前可接 3 個任務，其中 1 個為高優先級；接單前請先完成安全檢核。"],
+          ["user", "我想接一個 20 分鐘情緒傾聽任務。"]
+        ],
+        scenarios: ["情緒傾聽", "決策引導", "社交任務陪跑"],
+        next: "系統建議：接單後先使用傾聽腳本，不給診斷與保證；若出現自傷、霸凌或威脅訊號，立即轉介專業流程。"
+      }
+    };
+
+    let activeRole = "user";
+
+    function renderQuick() {
+      const data = roleData[activeRole];
+      document.getElementById("roleAvatar").textContent = data.avatar;
+      document.getElementById("roleTitle").textContent = data.title;
+      document.getElementById("roleDesc").textContent = data.desc;
+
+      const chat = document.getElementById("quickChat");
+      chat.innerHTML = data.messages.map(([type, text]) => `<div class="bubble ${type === "user" ? "user" : ""}">${text}</div>`).join("");
+
+      const scenarios = document.getElementById("quickScenarios");
+      scenarios.innerHTML = data.scenarios.map((item, index) => `<button class="scenario ${index === 0 ? "active" : ""}">${item}</button>`).join("");
+    }
+
+    document.querySelectorAll("#roleSeg button").forEach((button) => {
+      button.addEventListener("click", () => {
+        document.querySelectorAll("#roleSeg button").forEach((item) => item.classList.remove("active"));
+        button.classList.add("active");
+        activeRole = button.dataset.role;
+        renderQuick();
+      });
+    });
+
+    document.getElementById("quickNext").addEventListener("click", () => {
+      const chat = document.getElementById("quickChat");
+      const data = roleData[activeRole];
+      chat.insertAdjacentHTML("beforeend", `<div class="bubble">${data.next}</div>`);
+      chat.scrollTop = chat.scrollHeight;
+    });
+
+    document.getElementById("quickReset").addEventListener("click", renderQuick);
+
+    const cases = [
+      {
+        title: "朋友誤會與冷戰",
+        intro: "已三天沒有說話，使用者在主動道歉、等待、找共同朋友協調之間猶豫。",
+        choices: [
+          { title: "主動傳訊息說明誤會", desc: "用低壓方式開啟對話，先表達在乎與願意說清楚。", values: [76, 17, 7], note: "推薦方案：主動但不逼迫，最能提高關係修復機率。" },
+          { title: "再等幾天讓對方冷靜", desc: "降低立即衝突，但冷戰時間拉長後誤解可能加深。", values: [34, 45, 21], note: "風險較高：若超過一週仍無互動，建議切換主動策略。" },
+          { title: "請共同朋友幫忙協調", desc: "適合直接溝通壓力太大時使用，但可能讓事件變得複雜。", values: [55, 31, 14], note: "折衷方案：要選擇可信任且中立的人協助。" }
+        ]
+      },
+      {
+        title: "被排除在群組外",
+        intro: "使用者感到孤單，系統需判斷是暫時互動落差、排擠事件，或需要導師介入。",
+        choices: [
+          { title: "主動建立新的同儕連結", desc: "先把社交焦點從單一圈子移開，降低被排除造成的傷害。", values: [66, 24, 10], note: "推薦方案：擴大支持網，比直接衝突更穩定。" },
+          { title: "直接詢問其中一位同學", desc: "能快速確認原因，但需要準備好承受各種回應。", values: [45, 34, 21], note: "可行但需陪跑：建議先演練開場句。" },
+          { title: "告訴導師或輔導老師", desc: "若已有長期排擠或霸凌跡象，應啟動成人支持。", values: [71, 20, 9], note: "當出現持續性排擠時，求助不是失敗，是保護自己。" }
+        ]
+      },
+      {
+        title: "朋友要求借作業抄",
+        intro: "使用者在維持友誼、守住界線與違規風險之間拉扯。",
+        choices: [
+          { title: "拒絕抄襲但陪他一起完成", desc: "兼顧界線與支持，讓幫忙不等於承擔違規風險。", values: [73, 22, 5], note: "推薦方案：保護自己，同時保留友誼支持。" },
+          { title: "借他抄這一次", desc: "短期避免衝突，但容易讓下次要求變成慣例。", values: [38, 41, 21], note: "短期舒服，長期風險高。" },
+          { title: "直接拒絕並說自己也有壓力", desc: "清楚表達界線，但可能需要後續修復對方的不滿。", values: [52, 36, 12], note: "界線清楚，但語氣需要溫和。" }
+        ]
+      }
+    ];
+
+    let activeCase = 0;
+    let activeChoice = 0;
+
+    function renderCases() {
+      document.getElementById("caseList").innerHTML = cases.map((item, index) => (
+        `<button class="choice ${index === activeCase ? "selected" : ""}" data-case="${index}">
+          <strong>${item.title}</strong><span>${item.intro}</span>
+        </button>`
+      )).join("");
+
+      document.querySelectorAll("[data-case]").forEach((button) => {
+        button.addEventListener("click", () => {
+          activeCase = Number(button.dataset.case);
+          activeChoice = 0;
+          renderCases();
+          renderDecision();
+        });
+      });
+    }
+
+    function renderDecision() {
+      const current = cases[activeCase];
+      document.getElementById("caseTitle").textContent = current.title;
+      document.getElementById("caseIntro").textContent = current.intro;
+      document.getElementById("decisionChoices").innerHTML = current.choices.map((item, index) => (
+        `<button class="choice ${index === activeChoice ? "selected" : ""}" data-choice="${index}">
+          <strong>${String.fromCharCode(65 + index)}. ${item.title}</strong><span>${item.desc}</span>
+        </button>`
+      )).join("");
+
+      document.querySelectorAll("[data-choice]").forEach((button) => {
+        button.addEventListener("click", () => {
+          activeChoice = Number(button.dataset.choice);
+          renderDecision();
+        });
+      });
+
+      const choice = current.choices[activeChoice];
+      const labels = ["正向結果", "中性或延遲", "負向風險"];
+      const classes = ["green", "amber", "coral"];
+      document.getElementById("resultBars").innerHTML = choice.values.map((value, index) => (
+        `<div class="bar-row">
+          <div class="bar-label"><span>${labels[index]}</span><strong>${value}%</strong></div>
+          <div class="track"><div class="fill ${classes[index]}" style="--w:${value}%"></div></div>
+        </div>`
+      )).join("");
+      document.getElementById("decisionNote").textContent = choice.note;
+    }
+
+    const tasks = [
+      ["深夜陪伴", "匿名用戶｜社交焦慮｜20 分鐘", "NT$ 180"],
+      ["決策引導", "高中生｜升學選擇困難｜45 分鐘", "NT$ 420"],
+      ["情緒傾聽", "大學生｜人際挫折｜30 分鐘", "NT$ 260"],
+      ["社交任務陪跑", "國中生｜建立新連結｜一週追蹤", "NT$ 680"]
+    ];
+
+    function renderTasks() {
+      document.getElementById("taskList").innerHTML = tasks.map((task, index) => (
+        `<div class="task">
+          <div><strong>${task[0]}</strong><span>${task[1]}</span></div>
+          <button class="mini-btn" data-task="${index}">接單 ${task[2]}</button>
+        </div>`
+      )).join("");
+
+      document.querySelectorAll("[data-task]").forEach((button) => {
+        button.addEventListener("click", () => {
+          button.classList.add("done");
+          button.textContent = "已接單";
+        });
+      });
+    }
+
+    const moneyFormat = new Intl.NumberFormat("zh-TW", { maximumFractionDigits: 0 });
+
+    function money(value) {
+      if (value >= 1000000) return `NT$ ${(value / 1000000).toFixed(2)}M`;
+      if (value >= 1000) return `NT$ ${moneyFormat.format(value / 1000)}K`;
+      return `NT$ ${moneyFormat.format(value)}`;
+    }
+
+    function renderInvestor() {
+      const schools = Number(document.getElementById("schools").value);
+      const students = Number(document.getElementById("students").value);
+      const conversion = Number(document.getElementById("conversion").value);
+      const arpu = Number(document.getElementById("arpu").value);
+      const users = schools * students;
+      const schoolRevenue = schools * 20000;
+      const subRevenue = users * (conversion / 100) * arpu;
+      const serviceRevenue = users * 0.08 * 90 * 0.22;
+      const mrr = schoolRevenue + subRevenue + serviceRevenue;
+
+      document.getElementById("schoolsVal").textContent = schools;
+      document.getElementById("studentsVal").textContent = students;
+      document.getElementById("conversionVal").textContent = conversion;
+      document.getElementById("arpuVal").textContent = arpu;
+      document.getElementById("schoolRevenue").textContent = money(schoolRevenue);
+      document.getElementById("subRevenue").textContent = money(subRevenue);
+      document.getElementById("serviceRevenue").textContent = money(serviceRevenue);
+      document.getElementById("mrr").textContent = money(mrr);
+      document.getElementById("arr").textContent = money(mrr * 12);
+      document.getElementById("users").textContent = users >= 1000 ? `${moneyFormat.format(users / 1000)}K` : moneyFormat.format(users);
+    }
+
+    document.querySelectorAll("#schools, #students, #conversion, #arpu").forEach((input) => {
+      input.addEventListener("input", renderInvestor);
+    });
+
+    renderQuick();
+    renderCases();
+    renderDecision();
+    renderTasks();
+    renderInvestor();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>海豚決策孿生系統</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1a1814;
+  --ink-soft: #4a4640;
+  --ink-faint: #8a857e;
+  --paper: #faf8f4;
+  --paper2: #f2efe8;
+  --teal: #0f6e56;
+  --teal-light: #e1f5ee;
+  --teal-mid: #1d9e75;
+  --purple: #534ab7;
+  --purple-light: #eeedfe;
+  --amber: #ba7517;
+  --amber-light: #faeeda;
+  --coral: #993c1d;
+  --coral-light: #faece7;
+  --blue: #185fa5;
+  --blue-light: #e6f1fb;
+  --green: #3b6d11;
+  --green-light: #eaf3de;
+  --gray-light: #f1efe8;
+  --border: rgba(26,24,20,0.12);
+  --border-strong: rgba(26,24,20,0.25);
+  --r: 10px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Noto Sans TC', sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  background: rgba(250,248,244,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 32px;
+  height: 56px;
+  gap: 0;
+}
+
+.nav-logo {
+  font-family: 'Noto Serif TC', serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--teal);
+  margin-right: 40px;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+.nav-tabs {
+  display: flex;
+  gap: 2px;
+  overflow-x: auto;
+  flex: 1;
+}
+
+.nav-tab {
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--ink-faint);
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s;
+  white-space: nowrap;
+  font-family: 'Noto Sans TC', sans-serif;
+}
+
+.nav-tab:hover { background: var(--gray-light); color: var(--ink); }
+.nav-tab.active { background: var(--teal-light); color: var(--teal); font-weight: 500; }
+
+/* ── PAGES ── */
+.page { display: none; padding: 80px 40px 60px; max-width: 900px; margin: 0 auto; }
+.page.active { display: block; animation: fadeIn 0.35s ease; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── TYPOGRAPHY ── */
+.page-eyebrow {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin-bottom: 12px;
+}
+
+.page-title {
+  font-family: 'Noto Serif TC', serif;
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--ink);
+  margin-bottom: 16px;
+}
+
+.page-subtitle {
+  font-size: 16px;
+  color: var(--ink-soft);
+  line-height: 1.8;
+  margin-bottom: 40px;
+  max-width: 640px;
+}
+
+.section-title {
+  font-family: 'Noto Serif TC', serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 40px 0 16px;
+}
+
+/* ── CARDS ── */
+.card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 24px;
+  margin-bottom: 16px;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.card-sm {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 18px 20px;
+}
+
+.card-label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.card-value {
+  font-size: 22px;
+  font-weight: 700;
+  font-family: 'Noto Serif TC', serif;
+  line-height: 1.2;
+}
+
+.card-desc {
+  font-size: 13px;
+  color: var(--ink-faint);
+  margin-top: 6px;
+  line-height: 1.6;
+}
+
+/* ── FLOW DIAGRAM ── */
+.flow {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin: 28px 0;
+  flex-wrap: wrap;
+  row-gap: 12px;
+}
+
+.flow-node {
+  flex: 1;
+  min-width: 120px;
+  padding: 14px 16px;
+  border-radius: 8px;
+  text-align: center;
+  border: 1px solid var(--border);
+  background: white;
+}
+
+.flow-node .fn-label { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+.flow-node .fn-sub { font-size: 11px; color: var(--ink-faint); line-height: 1.5; }
+
+.flow-arrow {
+  width: 32px;
+  text-align: center;
+  color: var(--ink-faint);
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+/* ── BADGE ── */
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+/* ── TABLE ── */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin: 16px 0 24px;
+}
+
+.data-table th {
+  text-align: left;
+  padding: 10px 14px;
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  background: var(--gray-light);
+  border: 1px solid var(--border);
+}
+
+.data-table td {
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  vertical-align: top;
+  line-height: 1.6;
+}
+
+.data-table tr:nth-child(even) td { background: var(--paper2); }
+
+/* ── DOLPHIN GRID ── */
+.dolphin-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin: 24px 0;
+}
+
+.dolphin-card {
+  border-radius: 10px;
+  padding: 18px 12px;
+  text-align: center;
+  border: 1px solid var(--border);
+}
+
+.dolphin-icon { font-size: 26px; margin-bottom: 10px; }
+.dolphin-name { font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+.dolphin-role { font-size: 11px; line-height: 1.5; }
+
+/* ── PILL STEPS ── */
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.step {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px 20px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+}
+
+.step-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.step-body { flex: 1; }
+.step-title { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+.step-desc { font-size: 13px; color: var(--ink-faint); line-height: 1.6; }
+
+/* ── MVP TIMELINE ── */
+.timeline {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin: 24px 0;
+}
+
+.phase {
+  border-radius: var(--r);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.phase-header {
+  padding: 14px 18px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.phase-body {
+  padding: 14px 18px;
+  background: white;
+}
+
+.phase-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  font-size: 13px;
+  color: var(--ink-soft);
+  border-bottom: 1px solid var(--border);
+}
+
+.phase-item:last-child { border-bottom: none; }
+
+.phase-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ── CYCLE DIAGRAM ── */
+.cycle-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2/1;
+  margin: 28px 0;
+}
+
+.cycle-node {
+  position: absolute;
+  border-radius: var(--r);
+  padding: 14px 18px;
+  border: 1px solid var(--border);
+  background: white;
+  text-align: center;
+  width: 200px;
+}
+
+.cn-title { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+.cn-sub { font-size: 11px; color: var(--ink-faint); line-height: 1.5; }
+
+/* ── CALLOUT ── */
+.callout {
+  border-left: 3px solid var(--teal);
+  background: var(--teal-light);
+  border-radius: 0 var(--r) var(--r) 0;
+  padding: 16px 20px;
+  margin: 20px 0;
+  font-size: 14px;
+  color: var(--teal);
+  line-height: 1.7;
+}
+
+/* ── HERO ── */
+.hero-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: var(--teal-light);
+  border: 1px solid rgba(15,110,86,0.2);
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--teal);
+  margin-bottom: 24px;
+}
+
+.hero-graphic {
+  background: var(--paper2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 32px;
+  margin: 32px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  flex-wrap: wrap;
+  row-gap: 0;
+}
+
+.hero-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 16px 20px;
+  min-width: 120px;
+}
+
+.hero-step .hs-icon {
+  font-size: 28px;
+  margin-bottom: 10px;
+}
+
+.hero-step .hs-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.hero-step .hs-sub {
+  font-size: 11px;
+  color: var(--ink-faint);
+  line-height: 1.5;
+}
+
+.hero-sep {
+  font-size: 20px;
+  color: var(--ink-faint);
+  padding: 0 4px;
+}
+
+/* ── OUTCOME RECOMMENDATION BOX ── */
+.recommend {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 12px 16px;
+  background: var(--green-light);
+  border-radius: 8px;
+  border: 1px solid rgba(59,109,17,0.2);
+  font-size: 13px;
+  color: var(--green);
+  line-height: 1.6;
+  margin-top: 12px;
+}
+
+/* ── PROB BAR ── */
+.prob-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 6px 0;
+  font-size: 13px;
+}
+
+.prob-label { width: 60px; color: var(--ink-soft); }
+.prob-bar-wrap { flex: 1; background: var(--gray-light); border-radius: 4px; height: 8px; overflow: hidden; }
+.prob-bar { height: 100%; border-radius: 4px; }
+.prob-val { width: 36px; text-align: right; font-weight: 500; }
+
+/* ── SEL TAGS ── */
+.tag-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
+.tag {
+  padding: 5px 13px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  background: white;
+  color: var(--ink-soft);
+}
+
+/* responsive */
+@media (max-width: 600px) {
+  .page { padding: 72px 20px 40px; }
+  .page-title { font-size: 26px; }
+  .dolphin-grid { grid-template-columns: repeat(3, 1fr); }
+  .timeline { grid-template-columns: 1fr; }
+  nav { padding: 0 16px; }
+  .hero-graphic { padding: 20px; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">🐬 決策孿生</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage(0)">總覽</button>
+    <button class="nav-tab" onclick="showPage(1)">系統架構</button>
+    <button class="nav-tab" onclick="showPage(2)">三層決策</button>
+    <button class="nav-tab" onclick="showPage(3)">決策引擎</button>
+    <button class="nav-tab" onclick="showPage(4)">海豚人格</button>
+    <button class="nav-tab" onclick="showPage(5)">教育應用</button>
+    <button class="nav-tab" onclick="showPage(6)">MVP 藍圖</button>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════
+     PAGE 0: 總覽
+═══════════════════════════════════════════ -->
+<div class="page active" id="page-0">
+  <div class="hero-tag">AI 決策輔助系統 · 教育場域</div>
+  <div class="page-title">海豚決策孿生系統<br>Decision Twin</div>
+  <p class="page-subtitle">
+    不只是情緒陪伴——AI 海豚會幫你模擬每一個選擇的後果，讓學生、教師在情緒、學習與人際中，做出更好的決定。
+  </p>
+
+  <div class="hero-graphic">
+    <div class="hero-step">
+      <div class="hs-icon">📊</div>
+      <div class="hs-label">現實狀態</div>
+      <div class="hs-sub">情緒 · 行為 · 人際</div>
+    </div>
+    <div class="hero-sep">→</div>
+    <div class="hero-step">
+      <div class="hs-icon">🐬</div>
+      <div class="hs-label">數位孿生</div>
+      <div class="hs-sub">個人化建模</div>
+    </div>
+    <div class="hero-sep">→</div>
+    <div class="hero-step">
+      <div class="hs-icon">🔮</div>
+      <div class="hs-label">情境模擬</div>
+      <div class="hs-sub">What-if 分析</div>
+    </div>
+    <div class="hero-sep">→</div>
+    <div class="hero-step">
+      <div class="hs-icon">✅</div>
+      <div class="hs-label">決策建議</div>
+      <div class="hs-sub">多元觀點輸出</div>
+    </div>
+  </div>
+
+  <div class="card-grid" style="grid-template-columns: repeat(3,1fr);">
+    <div class="card-sm">
+      <div class="card-label" style="color:var(--teal)">核心技術</div>
+      <div class="card-value" style="color:var(--teal)">孿生建模</div>
+      <div class="card-desc">個人情緒 × 社交關係 × 時序行為，三維度合成個人模型</div>
+    </div>
+    <div class="card-sm">
+      <div class="card-label" style="color:var(--purple)">差異點</div>
+      <div class="card-value" style="color:var(--purple)">人際模擬</div>
+      <div class="card-desc">AI 預測「傳這則訊息後，關係改善的機率是 80%」</div>
+    </div>
+    <div class="card-sm">
+      <div class="card-label" style="color:var(--amber)">應用場景</div>
+      <div class="card-value" style="color:var(--amber)">SEL 教育</div>
+      <div class="card-desc">對應自我覺察、負責任決策、人際技巧三大能力</div>
+    </div>
+  </div>
+
+  <div class="callout">
+    🌟 一句話定位：「AI 海豚決策孿生系統——讓每個人在情緒、學習與人際中，做出更好的選擇」
+  </div>
+
+  <p style="font-size:13px;color:var(--ink-faint);line-height:1.8;">
+    適用場景：教育部計畫 · AI 創新競賽 · 智慧校園申請 · 科展與學術專題。本系統的「決策孿生」概念是評審最具感召力的核心亮點。
+  </p>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PAGE 1: 系統架構
+═══════════════════════════════════════════ -->
+<div class="page" id="page-1">
+  <div class="page-eyebrow">系統架構</div>
+  <div class="page-title">四層處理架構</div>
+  <p class="page-subtitle">從原始資料到決策輸出，海豚系統分四個處理層運作，每層負責不同的轉換任務。</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num" style="background:var(--gray-light);color:var(--ink)">1</div>
+      <div class="step-body">
+        <div class="step-title">輸入層 — 多維資料收集</div>
+        <div class="step-desc">同時收集三類訊號：<strong>情緒狀態</strong>（心情、焦慮、壓力值）、<strong>過去行為紀錄</strong>（習慣、選擇、結果）、<strong>人際關係圖譜</strong>（師生、同儕、親子關係網絡）。</div>
+      </div>
+      <div class="tag-row" style="margin:0;flex-direction:column;gap:4px;flex-shrink:0">
+        <span class="badge" style="background:var(--gray-light);color:var(--ink-soft)">情緒</span>
+        <span class="badge" style="background:var(--gray-light);color:var(--ink-soft)">行為</span>
+        <span class="badge" style="background:var(--gray-light);color:var(--ink-soft)">人際</span>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num" style="background:var(--teal-light);color:var(--teal)">2</div>
+      <div class="step-body">
+        <div class="step-title">建模層 — 海豚數位孿生</div>
+        <div class="step-desc">將輸入資料整合為個人化模型，包含<strong>個人行為模型</strong>（時序加權）、<strong>社交關係圖</strong>（節點強度）、<strong>情緒基準線</strong>（動態校正）。每次決策後自動更新模型權重。</div>
+      </div>
+      <span class="badge" style="background:var(--teal-light);color:var(--teal);flex-shrink:0">孿生建模</span>
+    </div>
+
+    <div class="step">
+      <div class="step-num" style="background:var(--purple-light);color:var(--purple)">3</div>
+      <div class="step-body">
+        <div class="step-title">模擬層 — What-if 情境引擎</div>
+        <div class="step-desc">對每個決策選項平行運算三條分析路徑：<strong>機率模型</strong>（成功 / 中性 / 失敗）、<strong>情緒影響預測</strong>（焦慮、快樂、自信變化）、<strong>長期後果模擬</strong>（1週 → 1月 → 1學期）。最終以加權平均合成綜合評分。</div>
+      </div>
+      <span class="badge" style="background:var(--purple-light);color:var(--purple);flex-shrink:0">情境模擬</span>
+    </div>
+
+    <div class="step">
+      <div class="step-num" style="background:var(--green-light);color:var(--green)">4</div>
+      <div class="step-body">
+        <div class="step-title">輸出層 — 多元觀點決策建議</div>
+        <div class="step-desc">由五種不同人格的海豚，從各自視角提供決策建議，避免單一觀點偏誤。使用者可以選擇最符合當下需求的建議方向，並看到各選擇的預測影響等級（高 / 中 / 低）。</div>
+      </div>
+      <span class="badge" style="background:var(--green-light);color:var(--green);flex-shrink:0">決策輸出</span>
+    </div>
+  </div>
+
+  <div class="callout">
+    ↻ 回饋迴路：使用者的真實決策結果會持續回饋，更新個人孿生模型，讓系統隨時間越來越準確。
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PAGE 2: 三層決策
+═══════════════════════════════════════════ -->
+<div class="page" id="page-2">
+  <div class="page-eyebrow">三層決策架構</div>
+  <div class="page-title">個人 · 社交 · 教師</div>
+  <p class="page-subtitle">系統針對三個不同使用者層級，提供量身打造的決策孿生功能。</p>
+
+  <!-- Individual -->
+  <div class="section-title">1 個人決策孿生（學生）</div>
+  <p style="font-size:14px;color:var(--ink-soft);line-height:1.8;margin-bottom:16px;">當學生遇到選擇，系統輸入情緒 + 過去行為 + 人際關係 + 學習狀況，模擬不同選擇的後果。</p>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>選擇</th>
+        <th>情緒影響</th>
+        <th>學習影響</th>
+        <th>人際影響</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>上台報告</strong></td>
+        <td><span style="color:var(--coral)">緊張 ↑</span></td>
+        <td><span style="color:var(--green)">成長 ↑</span></td>
+        <td><span style="color:var(--green)">自信 ↑</span></td>
+      </tr>
+      <tr>
+        <td><strong>不上台</strong></td>
+        <td><span style="color:var(--green)">安心 ↑</span></td>
+        <td><span style="color:var(--coral)">成長 ↓</span></td>
+        <td><span style="color:var(--amber)">逃避 ↑</span></td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="recommend">👉 建議：先進行小組練習，再嘗試上台——以漸進方式降低焦慮並累積自信。</div>
+
+  <!-- Social -->
+  <div class="section-title">2 社交決策孿生（交朋友系統）</div>
+  <p style="font-size:14px;color:var(--ink-soft);line-height:1.8;margin-bottom:16px;">AI 模擬「人際互動後果」——分析對方近期情緒、雙方互動歷史、社交網絡關係，再給出行動建議。</p>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>行動</th>
+        <th>預測結果</th>
+        <th>成功機率</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>傳訊息關心</strong></td>
+        <td><span style="color:var(--green)">改善關係</span></td>
+        <td>
+          <div class="prob-row" style="margin:0">
+            <div class="prob-bar-wrap"><div class="prob-bar" style="width:80%;background:var(--teal-mid)"></div></div>
+            <span class="prob-val" style="color:var(--teal)">80%</span>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td><strong>維持現狀</strong></td>
+        <td><span style="color:var(--ink-faint)">關係冷淡持續</span></td>
+        <td>
+          <div class="prob-row" style="margin:0">
+            <div class="prob-bar-wrap"><div class="prob-bar" style="width:20%;background:var(--ink-faint)"></div></div>
+            <span class="prob-val" style="color:var(--ink-faint)">20%</span>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="recommend">👉 建議：現在是適合關心對方的時機——對方最近情緒穩定，接受度高。</div>
+
+  <!-- Teacher -->
+  <div class="section-title">3 教師決策孿生</div>
+  <p style="font-size:14px;color:var(--ink-soft);line-height:1.8;margin-bottom:16px;">根據班級數位孿生，模擬不同教學策略對整體班級的影響。</p>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>教學策略</th>
+        <th>情緒影響</th>
+        <th>參與度</th>
+        <th>學習成效</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>分組討論</strong></td>
+        <td><span style="color:var(--green)">合作 ↑</span></td>
+        <td><span style="color:var(--green)">高</span></td>
+        <td><span style="color:var(--amber)">中</span></td>
+      </tr>
+      <tr>
+        <td><strong>講述教學</strong></td>
+        <td><span style="color:var(--ink-faint)">穩定</span></td>
+        <td><span style="color:var(--coral)">低</span></td>
+        <td><span style="color:var(--green)">高</span></td>
+      </tr>
+      <tr>
+        <td><strong>遊戲化活動</strong></td>
+        <td><span style="color:var(--green)">快樂 ↑</span></td>
+        <td><span style="color:var(--green)">很高</span></td>
+        <td><span style="color:var(--amber)">中</span></td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="recommend">👉 建議：本班目前焦慮偏高，優先採用「遊戲化＋分組」混合模式，再輔以重點講述。</div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PAGE 3: 決策引擎
+═══════════════════════════════════════════ -->
+<div class="page" id="page-3">
+  <div class="page-eyebrow">決策引擎</div>
+  <div class="page-title">演算法設計（簡化版）</div>
+  <p class="page-subtitle">三個核心模型協作運算，構成決策引擎的底層邏輯。</p>
+
+  <div class="section-title">核心模型一：決策樹</div>
+  <div class="card">
+    <div style="font-size:13px;color:var(--ink-soft);line-height:1.9;margin-bottom:16px;">
+      每個選項展開為決策節點，每個節點對應三種機率結果：
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <div style="flex:1;min-width:140px;padding:14px;background:var(--green-light);border-radius:8px;border:1px solid rgba(59,109,17,0.2);text-align:center;">
+        <div style="font-size:22px;font-weight:700;color:var(--green);font-family:'Noto Serif TC',serif;">70%</div>
+        <div style="font-size:12px;color:var(--green);margin-top:4px;">成功</div>
+      </div>
+      <div style="flex:1;min-width:140px;padding:14px;background:var(--amber-light);border-radius:8px;border:1px solid rgba(186,117,23,0.2);text-align:center;">
+        <div style="font-size:22px;font-weight:700;color:var(--amber);font-family:'Noto Serif TC',serif;">20%</div>
+        <div style="font-size:12px;color:var(--amber);margin-top:4px;">中性</div>
+      </div>
+      <div style="flex:1;min-width:140px;padding:14px;background:var(--coral-light);border-radius:8px;border:1px solid rgba(153,60,29,0.2);text-align:center;">
+        <div style="font-size:22px;font-weight:700;color:var(--coral);font-family:'Noto Serif TC',serif;">10%</div>
+        <div style="font-size:12px;color:var(--coral);margin-top:4px;">失敗</div>
+      </div>
+    </div>
+    <div style="margin-top:14px;font-size:12px;color:var(--ink-faint);">機率值由個人歷史行為資料與社交關係強度動態計算，非固定值。</div>
+  </div>
+
+  <div class="section-title">核心模型二：情緒—行為—結果循環</div>
+  <div class="card">
+    <div style="font-size:13px;color:var(--ink-soft);line-height:1.8;margin-bottom:20px;">
+      三個狀態互相驅動，形成自我更新的閉環：
+    </div>
+    <div style="display:flex;align-items:center;gap:0;flex-wrap:wrap;row-gap:12px;justify-content:center;">
+      <div style="padding:14px 20px;background:var(--coral-light);border-radius:8px;border:1px solid rgba(153,60,29,0.2);text-align:center;min-width:140px;">
+        <div style="font-weight:500;font-size:14px;color:var(--coral);">情緒狀態</div>
+        <div style="font-size:11px;color:var(--coral);margin-top:4px;opacity:0.8;">焦慮 · 快樂 · 壓力</div>
+      </div>
+      <div style="padding:0 10px;font-size:18px;color:var(--ink-faint);">→<br><span style="font-size:10px">驅動</span></div>
+      <div style="padding:14px 20px;background:var(--purple-light);border-radius:8px;border:1px solid rgba(83,74,183,0.2);text-align:center;min-width:140px;">
+        <div style="font-weight:500;font-size:14px;color:var(--purple);">行為選擇</div>
+        <div style="font-size:11px;color:var(--purple);margin-top:4px;opacity:0.8;">決策樹加權</div>
+      </div>
+      <div style="padding:0 10px;font-size:18px;color:var(--ink-faint);">→<br><span style="font-size:10px">產生</span></div>
+      <div style="padding:14px 20px;background:var(--teal-light);border-radius:8px;border:1px solid rgba(15,110,86,0.2);text-align:center;min-width:140px;">
+        <div style="font-weight:500;font-size:14px;color:var(--teal);">結果預測</div>
+        <div style="font-size:11px;color:var(--teal);margin-top:4px;opacity:0.8;">高 · 中 · 低</div>
+      </div>
+    </div>
+    <div style="margin-top:14px;padding:10px 16px;background:var(--gray-light);border-radius:8px;font-size:12px;color:var(--ink-faint);text-align:center;">
+      ↻ 結果回饋更新情緒基準線 · 每次決策後自動調整模型權重
+    </div>
+  </div>
+
+  <div class="section-title">核心模型三：時間維度預測</div>
+  <div class="card">
+    <div style="font-size:13px;color:var(--ink-soft);line-height:1.8;margin-bottom:16px;">
+      同一決策在不同時間維度的影響不同，系統同步計算三個時間跨度：
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+      <div style="padding:14px;background:var(--blue-light);border-radius:8px;border:1px solid rgba(24,95,165,0.2);">
+        <div style="font-size:11px;font-weight:500;color:var(--blue);margin-bottom:6px;">短期 · 1週</div>
+        <div style="font-size:13px;color:var(--ink-soft);line-height:1.6;">情緒直接影響、即時人際反應</div>
+      </div>
+      <div style="padding:14px;background:var(--purple-light);border-radius:8px;border:1px solid rgba(83,74,183,0.2);">
+        <div style="font-size:11px;font-weight:500;color:var(--purple);margin-bottom:6px;">中期 · 1月</div>
+        <div style="font-size:13px;color:var(--ink-soft);line-height:1.6;">習慣形成、關係強度變化</div>
+      </div>
+      <div style="padding:14px;background:var(--amber-light);border-radius:8px;border:1px solid rgba(186,117,23,0.2);">
+        <div style="font-size:11px;font-weight:500;color:var(--amber);margin-bottom:6px;">長期 · 1學期</div>
+        <div style="font-size:13px;color:var(--ink-soft);line-height:1.6;">能力成長、社交資本累積</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PAGE 4: 海豚人格
+═══════════════════════════════════════════ -->
+<div class="page" id="page-4">
+  <div class="page-eyebrow">海豚人格設計</div>
+  <div class="page-title">五種決策視角</div>
+  <p class="page-subtitle">不同海豚代表不同的決策哲學，提供多元觀點，避免 AI 系統的單一偏誤。</p>
+
+  <div class="dolphin-grid">
+    <div class="dolphin-card" style="background:var(--blue-light);border-color:rgba(24,95,165,0.2);">
+      <div class="dolphin-icon">🐬</div>
+      <div class="dolphin-name" style="color:var(--blue)">理性海豚</div>
+      <div class="dolphin-role" style="color:var(--blue)">分析利弊得失</div>
+    </div>
+    <div class="dolphin-card" style="background:var(--coral-light);border-color:rgba(153,60,29,0.2);">
+      <div class="dolphin-icon">🐬</div>
+      <div class="dolphin-name" style="color:var(--coral)">情緒海豚</div>
+      <div class="dolphin-role" style="color:var(--coral)">重視當下感受</div>
+    </div>
+    <div class="dolphin-card" style="background:var(--amber-light);border-color:rgba(186,117,23,0.2);">
+      <div class="dolphin-icon">🐬</div>
+      <div class="dolphin-name" style="color:var(--amber)">勇氣海豚</div>
+      <div class="dolphin-role" style="color:var(--amber)">鼓勵冒險挑戰</div>
+    </div>
+    <div class="dolphin-card" style="background:var(--teal-light);border-color:rgba(15,110,86,0.2);">
+      <div class="dolphin-icon">🐬</div>
+      <div class="dolphin-name" style="color:var(--teal)">安全海豚</div>
+      <div class="dolphin-role" style="color:var(--teal)">降低決策風險</div>
+    </div>
+    <div class="dolphin-card" style="background:var(--purple-light);border-color:rgba(83,74,183,0.2);">
+      <div class="dolphin-icon">🐬</div>
+      <div class="dolphin-name" style="color:var(--purple)">社交海豚</div>
+      <div class="dolphin-role" style="color:var(--purple)">人際關係優先</div>
+    </div>
+  </div>
+
+  <div class="section-title">實際應用範例</div>
+  <div class="card">
+    <div style="font-size:14px;font-weight:500;margin-bottom:16px;color:var(--ink-faint);">場景：學生問「我要不要轉班？」</div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:var(--blue-light);border-radius:8px;">
+        <span style="font-size:16px;flex-shrink:0;">🐬</span>
+        <div>
+          <div style="font-size:12px;font-weight:500;color:var(--blue);margin-bottom:4px;">理性海豚說</div>
+          <div style="font-size:13px;color:var(--ink-soft);line-height:1.7;">新班的師資在你擅長的數學領域更強，轉班後學習資源提升 40%，長期成績成長機率較高。</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:var(--coral-light);border-radius:8px;">
+        <span style="font-size:16px;flex-shrink:0;">🐬</span>
+        <div>
+          <div style="font-size:12px;font-weight:500;color:var(--coral);margin-bottom:4px;">情緒海豚說</div>
+          <div style="font-size:13px;color:var(--ink-soft);line-height:1.7;">你在現在的班級有 3 位很要好的朋友，離開可能會讓你感到孤單，這份感受值得重視。</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:var(--teal-light);border-radius:8px;">
+        <span style="font-size:16px;flex-shrink:0;">🐬</span>
+        <div>
+          <div style="font-size:12px;font-weight:500;color:var(--teal);margin-bottom:4px;">安全海豚說</div>
+          <div style="font-size:13px;color:var(--ink-soft);line-height:1.7;">轉班需要重新適應新環境與人際，前 1 個月壓力會明顯上升，請評估自己目前的抗壓能力。</div>
+        </div>
+      </div>
+    </div>
+    <div class="recommend" style="margin-top:16px;">👉 多元觀點幫助學生從不同角度思考，培養負責任決策能力（SEL 核心素養）。</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PAGE 5: 教育應用
+═══════════════════════════════════════════ -->
+<div class="page" id="page-5">
+  <div class="page-eyebrow">教育應用</div>
+  <div class="page-title">SEL × 決策能力培養</div>
+  <p class="page-subtitle">海豚決策孿生系統完整對應社會情緒學習（SEL）的五大核心能力，可直接嵌入課程設計。</p>
+
+  <div class="section-title">SEL 對應框架</div>
+  <div class="card-grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));">
+    <div class="card-sm" style="border-left:3px solid var(--teal);border-radius:0 var(--r) var(--r) 0;">
+      <div class="card-label" style="color:var(--teal)">自我覺察</div>
+      <div style="font-size:13px;color:var(--ink-soft);line-height:1.6;margin-top:4px;">情緒紀錄與孿生建模，幫助學生認識自己的情緒模式</div>
+    </div>
+    <div class="card-sm" style="border-left:3px solid var(--purple);border-radius:0 var(--r) var(--r) 0;">
+      <div class="card-label" style="color:var(--purple)">負責任決策</div>
+      <div style="font-size:13px;color:var(--ink-soft);line-height:1.6;margin-top:4px;">模擬不同選擇的後果，學習承擔決策責任</div>
+    </div>
+    <div class="card-sm" style="border-left:3px solid var(--coral);border-radius:0 var(--r) var(--r) 0;">
+      <div class="card-label" style="color:var(--coral)">人際技巧</div>
+      <div style="font-size:13px;color:var(--ink-soft);line-height:1.6;margin-top:4px;">社交決策孿生預測人際互動，培養溝通敏感度</div>
+    </div>
+    <div class="card-sm" style="border-left:3px solid var(--amber);border-radius:0 var(--r) var(--r) 0;">
+      <div class="card-label" style="color:var(--amber)">自我管理</div>
+      <div style="font-size:13px;color:var(--ink-soft);line-height:1.6;margin-top:4px;">時序行為追蹤，協助學生建立正向習慣</div>
+    </div>
+    <div class="card-sm" style="border-left:3px solid var(--blue);border-radius:0 var(--r) var(--r) 0;">
+      <div class="card-label" style="color:var(--blue)">社會意識</div>
+      <div style="font-size:13px;color:var(--ink-soft);line-height:1.6;margin-top:4px;">人際關係圖譜讓學生理解群體動態</div>
+    </div>
+  </div>
+
+  <div class="section-title">課堂應用範例：決策模擬任務</div>
+  <div class="card">
+    <div style="font-size:14px;font-weight:500;margin-bottom:4px;">活動設計</div>
+    <div style="font-size:13px;color:var(--ink-faint);margin-bottom:16px;">「如果你是班長，你會怎麼處理同學之間的衝突？」</div>
+    <div class="steps" style="margin:0;gap:8px;">
+      <div class="step" style="padding:12px 16px;">
+        <div class="step-num" style="background:var(--blue-light);color:var(--blue);width:24px;height:24px;font-size:11px;">1</div>
+        <div class="step-body">
+          <div class="step-title" style="font-size:13px;">學生選擇行動方案</div>
+          <div class="step-desc" style="font-size:12px;">從系統提供的選項中選擇決策，或自行輸入想法。</div>
+        </div>
+      </div>
+      <div class="step" style="padding:12px 16px;">
+        <div class="step-num" style="background:var(--purple-light);color:var(--purple);width:24px;height:24px;font-size:11px;">2</div>
+        <div class="step-body">
+          <div class="step-title" style="font-size:13px;">AI 模擬結果顯示</div>
+          <div class="step-desc" style="font-size:12px;">系統即時呈現各選擇的情緒、人際、學習影響預測。</div>
+        </div>
+      </div>
+      <div class="step" style="padding:12px 16px;">
+        <div class="step-num" style="background:var(--teal-light);color:var(--teal);width:24px;height:24px;font-size:11px;">3</div>
+        <div class="step-body">
+          <div class="step-title" style="font-size:13px;">班級討論不同選擇</div>
+          <div class="step-desc" style="font-size:12px;">教師引導學生比較各方觀點，深化思考與同理心。</div>
+        </div>
+      </div>
+    </div>
+    <div class="recommend" style="margin-top:16px;">👉 此活動成為 AI 輔助情境教學，直接提升學生的 SEL 核心能力。</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PAGE 6: MVP 藍圖
+═══════════════════════════════════════════ -->
+<div class="page" id="page-6">
+  <div class="page-eyebrow">開發藍圖</div>
+  <div class="page-title">MVP 三階段計畫</div>
+  <p class="page-subtitle">務實落地策略——不一次做太多，分三個階段逐步擴展功能，降低開發風險。</p>
+
+  <div class="timeline">
+    <div class="phase">
+      <div class="phase-header" style="background:var(--gray-light);color:var(--ink);">
+        第一階段 · 核心 MVP
+      </div>
+      <div class="phase-body">
+        <div style="font-size:11px;color:var(--ink-faint);margin-bottom:10px;">建立基礎功能，快速驗證核心價值</div>
+        <div class="phase-item">
+          <div class="phase-dot" style="background:var(--ink-soft)"></div>
+          情緒每日紀錄
+        </div>
+        <div class="phase-item">
+          <div class="phase-dot" style="background:var(--ink-soft)"></div>
+          海豚基礎聊天
+        </div>
+        <div class="phase-item">
+          <div class="phase-dot" style="background:var(--ink-soft)"></div>
+          簡單決策模擬（2選1）
+        </div>
+        <div class="phase-item">
+          <div class="phase-dot" style="background:var(--ink-soft)"></div>
+          結果預測（高/中/低）
+        </div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-header" style="background:var(--teal-light);color:var(--teal);">
+        第二階段 · 功能擴展
+      </div>
+      <div class="phase-body">
+        <div style="font-size:11px;color:var(--ink-faint);margin-bottom:10px;">加入教師端與進階分析</div>
+        <div class="phase-item">
+          <div class="phase-dot" style="background:var(--teal-mid)"></div>
+          多選項情境模擬
+        </div>
+        <div class="phase-item">
+          <div class="phase-dot" style="background:var(--teal-mid)"></div>
+          機率分析視覺化
+        </div>
+        <div class="phase-item">
+          <div class="phase-dot" style="background:var(--teal-mid)"></div>
+          教師儀表板
+        </div>
+        <div class="phase-item">
+          <div class="phase-dot" style="background:var(--teal-mid)"></div>
+          班級孿生分析
+        </div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-header" style="background:var(--purple-light);color:var(--purple);">
+        第三階段 · 完整系統
+      </div>
+      <div class="phase-body">
+        <div style="font-size:11px;color:var(--ink-faint);margin-bottom:10px;">AI 人格與長期預測</div>
+        <div class="phase-item">
+          <div class="phase-dot" style="background:var(--purple)"></div>
+          五種 AI 人格海豚
+        </div>
+        <div class="phase-item">
+          <div class="phase-dot" style="background:var(--purple)"></div>
+          社交決策孿生
+        </div>
+        <div class="phase-item">
+          <div class="phase-dot" style="background:var(--purple)"></div>
+          學期長期預測
+        </div>
+        <div class="phase-item">
+          <div class="phase-dot" style="background:var(--purple)"></div>
+          自我更新模型
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">競賽申請亮點</div>
+  <div class="card-grid" style="grid-template-columns:repeat(2,1fr);">
+    <div class="card-sm" style="background:var(--paper2);">
+      <div class="card-label" style="color:var(--teal)">技術創新點</div>
+      <div style="font-size:13px;color:var(--ink-soft);line-height:1.7;margin-top:6px;">
+        決策孿生 × 情緒—行為—結果循環模型，業界首見應用於教育 SEL 場域的個人化 What-if 模擬引擎。
+      </div>
+    </div>
+    <div class="card-sm" style="background:var(--paper2);">
+      <div class="card-label" style="color:var(--purple)">社會影響力</div>
+      <div style="font-size:13px;color:var(--ink-soft);line-height:1.7;margin-top:6px;">
+        幫助高風險學生在關鍵時刻做出更好的選擇，降低霸凌、退縮、人際衝突等負面事件的發生率。
+      </div>
+    </div>
+    <div class="card-sm" style="background:var(--paper2);">
+      <div class="card-label" style="color:var(--amber)">市場差異化</div>
+      <div style="font-size:13px;color:var(--ink-soft);line-height:1.7;margin-top:6px;">
+        現有 AI 教育產品多聚焦學科輔導，本系統首次將決策模擬引入情緒與人際領域。
+      </div>
+    </div>
+    <div class="card-sm" style="background:var(--paper2);">
+      <div class="card-label" style="color:var(--coral)">可擴展性</div>
+      <div style="font-size:13px;color:var(--ink-soft);line-height:1.7;margin-top:6px;">
+        架構可延伸至親職教育、企業人才培育、心理諮商輔助等相鄰場域。
+      </div>
+    </div>
+  </div>
+
+  <div class="callout" style="margin-top:32px;">
+    🌟 核心主張：「AI 海豚決策孿生系統——讓每個人在情緒、學習與人際中，做出更好的選擇」
+  </div>
+</div>
+
+<script>
+function showPage(idx) {
+  document.querySelectorAll('.page').forEach((p, i) => {
+    p.classList.toggle('active', i === idx);
+  });
+  document.querySelectorAll('.nav-tab').forEach((t, i) => {
+    t.classList.toggle('active', i === idx);
+  });
+  window.scrollTo(0, 0);
+}
+</script>
+</body>
+</html>

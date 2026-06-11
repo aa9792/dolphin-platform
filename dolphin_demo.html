@@ -648,6 +648,43 @@ const COMPANION_VOICE_PROFILES=[
   {label:'清楚引導',rate:.96,pitch:.9,voiceIndex:0}
 ];
 const CHAT_SCENE_LABELS=['我跟好朋友冷戰三天，很怕主動說話會更尷尬。','朋友想借我的作業抄，我想幫他又怕一起犯錯。','班上有人把我排除在群組外，我覺得自己好像不被需要。'];
+const DOLPHIN_CHAT_FLOWS=[
+  {
+    reflect:['我先幫你把線索整理一下：你在意的不是單一事件，而是這件事背後的信任、界線和後果。','我聽到兩個重點：一邊是你想把事情處理好，一邊是你擔心做錯一步會讓情況更複雜。'],
+    encourage:['你願意把問題說出來，代表你已經在面對它了。先不用要求自己馬上有完美答案。','我們可以慢慢拆，不用急著下結論；把問題拆小，本身就是一種很清醒的能力。'],
+    question:['如果只選一個最想先弄清楚的問題，你會想知道「對方怎麼想」，還是「自己接下來怎麼做比較安心」？','這件事裡，哪一個部分最讓你卡住：怕尷尬、怕失去關係，還是怕後果不可控？'],
+    support:['我可以先陪你列出目前知道的事實，再把猜測和感受分開。你想到什麼都可以繼續說。','先把今天能掌握的資訊放在桌上就好；其他不確定的地方，我們一個一個確認。']
+  },
+  {
+    reflect:['我聽見你其實很在乎這段關係，所以才會這麼拉扯。這種難受不是小題大作。','你現在的感覺很珍貴，它在提醒你：這件事真的碰到你心裡重要的位置。'],
+    encourage:['你不用把自己逼得很堅強。能承認自己受影響，已經是很勇敢的事。','先讓感受有地方放，不急著修好所有關係；你值得被好好對待。'],
+    question:['如果用一個詞形容現在的心情，會比較像委屈、害怕、孤單，還是內疚？','你最希望有人對你說的一句話是什麼？我想先陪你把那個需要聽見。'],
+    support:['我們可以先停在感受這裡，多說一點也沒關係。我會陪你聽完，不急著替你做決定。','你可以慢慢說，哪怕只是很亂、很煩、很不舒服，也都可以。']
+  },
+  {
+    reflect:['我看到你其實不是沒有力量，而是正在找一個不會傷害自己的前進方式。','你已經在面對問題了，現在要做的是把勇氣變成一個小到今天能完成的步驟。'],
+    encourage:['很好，先不用做很大的改變。只要往前半步，就已經不是停在原地。','你比現在感覺到的更有力量，我們先選一個低壓、可回頭的小行動。'],
+    question:['如果今天只做一件很小的事，你覺得哪一步最不會讓你太害怕？','你希望自己明天回頭看時，會覺得「至少我有試著照顧自己」的是哪個行動？'],
+    support:['我陪你把行動縮小：一句話、一個訊息、一個求助對象，都可以算是前進。','勇敢不是硬撐，是知道自己害怕，還願意找一個安全的方式往前。']
+  },
+  {
+    reflect:['我會先把安全和界線放在前面看。你會猶豫，可能是因為心裡已經感覺到某些風險。','我聽到你不只擔心結果，也擔心自己會不會承擔太多。這個提醒很重要。'],
+    encourage:['你可以保護自己，這不是自私。穩住自己，才有空間處理關係。','慢慢來，我們先找最不會讓局面升高的方式。安全感比速度重要。'],
+    question:['這件事目前有沒有讓你感到被威脅、被逼迫，或害怕自己受傷？','你身邊有沒有一位可信任的大人、老師或朋友，可以在需要時知道這件事？'],
+    support:['如果只是一般人際困擾，我們可以先用低風險方式處理；如果有威脅或傷害訊號，就不要一個人承擔。','你可以先不用回應任何人，先確認自己情緒和環境是安全的。']
+  },
+  {
+    reflect:['我聽見你在乎的不只是這件事本身，而是自己在關係裡的位置。這很值得被認真看待。','關係裡常常不只兩個人，還有共同朋友、群組氣氛和彼此的默契。你感覺到的複雜是真的。'],
+    encourage:['你不是只能等別人選你。你也可以慢慢建立讓自己舒服的連結。','能在關係裡保留善意，同時照顧自己，這是一種成熟的社交能力。'],
+    question:['目前有沒有一個人，是你覺得比較中立、比較能好好說話的？','你最想保住的是哪一段關係：某位朋友、整個圈子，還是自己在班上的安全感？'],
+    support:['我們可以先找支持點，不急著處理整個圈子。關係修復通常從一個比較安全的人開始。','我會陪你看關係網絡，不只看誰對誰錯，也看哪一步能讓你比較不孤單。']
+  }
+];
+const COMPANION_CHAT_FLOWS=[
+  {reflect:'我聽到了，這件事對你來說真的有重量。你願意說出來，已經是在照顧自己。',question:'你現在比較需要我陪你聽完，還是陪你一起整理接下來的小步驟？'},
+  {reflect:'我在這裡。你不需要把話說得很完整，慢慢講也可以。',question:'這件事最讓你心裡酸酸的是哪個部分？'},
+  {reflect:'我先幫你抓到一個核心：你想有方向，但也不想被逼著馬上做選擇。這很合理。',question:'如果我們先只看今天，你希望今天結束前自己能稍微好過一點的是什麼？'}
+];
 function applyGoalAlignedChatContent(){
   const upgradedDolphins=[
     {
@@ -790,8 +827,13 @@ function addMsg(role,text,extraClass=''){const box=document.getElementById('chat
 function showTyping(){setDolphinSpeaking(true);const box=document.getElementById('chatMsgs'),div=document.createElement('div');div.id='typing';div.className='msg bot';div.innerHTML='<div class="typing"><span></span><span></span><span></span></div>';box.appendChild(div);box.scrollTop=box.scrollHeight;}
 function removeTyping(){const el=document.getElementById('typing');if(el)el.remove();}
 function inferSceneFromText(txt){if(/作業|抄|作弊|功課|考試/.test(txt))return 1;if(/排擠|排除|群組|孤單|午餐|霸凌|不被需要|沒有人/.test(txt))return 2;if(/朋友|吵架|冷戰|誤會|道歉|和好|不說話/.test(txt))return 0;return scene;}
+function hasSafetySignal(txt){return /想死|自殺|傷害自己|不想活|被威脅|被打|性侵|家暴|霸凌到|活不下去/.test(txt);}
+function pickLine(arr,shift=0){return arr[(chatRound+scene+dolphinIdx+shift)%arr.length];}
+function wantsOptions(txt){return /怎麼辦|選擇|選項|決定|要不要|不知道|幫我想|建議/.test(txt);}
+function generateDolphinReply(txt){if(hasSafetySignal(txt))return'我很在意你的安全。這件事聽起來已經不只是普通煩惱了，請你先找身邊可信任的大人、老師、家人或當地緊急資源陪你，不要一個人承受。我也會在這裡陪你慢慢說。';const flow=DOLPHIN_CHAT_FLOWS[dolphinIdx]||DOLPHIN_CHAT_FLOWS[0];if(chatRound<=1)return`${pickLine(flow.reflect)} ${pickLine(flow.question,1)}`;if(chatRound===2)return`${pickLine(flow.encourage)} ${pickLine(flow.support,1)}`;if(chatRound===3)return`${pickLine(flow.reflect,1)} ${pickLine(flow.question,2)}`;if(chatRound===4)return`${pickLine(flow.support)} ${pickLine(flow.encourage,2)}`;if(chatRound>=5&&wantsOptions(txt))return`${pickLine(flow.encourage)} 如果你等一下想把選項整理得更清楚，可以按右下角的模擬器；但我們不用急，現在也可以繼續聊你的感受和想法。`;return`${pickLine(flow.reflect,2)} ${pickLine(flow.question,3)}`;}
+function generateCompanionReply(txt){if(hasSafetySignal(txt))return'我先陪你把安全放在第一位。若你現在有傷害自己、被威脅或正在被傷害的風險，請立刻找身邊可信任的大人或當地緊急資源。我會陪你，但這種情況不需要一個人撐。';const flow=COMPANION_CHAT_FLOWS[companionIdx]||COMPANION_CHAT_FLOWS[0];if(chatRound<=1)return`${flow.reflect} ${flow.question}`;if(chatRound===2)return'謝謝你願意繼續說。你可以不用急著變好，我們先讓心裡那團很亂的東西有一點形狀。';if(chatRound===3)return'我會陪你慢慢整理，不急著推你做決定。你現在說的每一點，都能幫我們更靠近真正卡住的地方。';if(chatRound>=5&&wantsOptions(txt))return'如果你之後想整理選項，我可以陪你慢慢列；現在我們也可以先留在聊天裡，多說一點你心裡的感覺。';return`${flow.reflect} 你可以再多告訴我一點，這件事從什麼時候開始最明顯？`;}
 function pickScene(idx){scene=idx;const chips=document.getElementById('sceneChips');if(chips)chips.style.display='none';addMsg('me',CHAT_SCENE_LABELS[idx]);const opener=chatMode==='companion'?COMPANIONS[companionIdx].replies[0][idx%2]:DOLPHINS[dolphinIdx].openers[idx];const bubbleClass=chatMode==='companion'?'human-bubble':'';setTimeout(()=>{showTyping();setTimeout(()=>{removeTyping();addMsg('bot',opener,bubbleClass);chatRound=1;},1800);},300);}
-function sendMsg(){const inp=document.getElementById('chatIn'),txt=inp.value.trim();if(!txt)return;addMsg('me',txt);inp.value='';let rep,bubbleClass='';if(chatMode==='companion'){scene=inferSceneFromText(txt);const c=COMPANIONS[companionIdx];const round=Math.min(Math.max(chatRound-1,0),c.replies.length-1);rep=c.replies[round][Math.floor(Math.random()*c.replies[round].length)];bubbleClass='human-bubble';}else{if(chatRound===0){scene=inferSceneFromText(txt);rep=DOLPHINS[dolphinIdx].openers[scene];}else{const d=DOLPHINS[dolphinIdx];rep=d.replies[Math.min(chatRound-1,d.replies.length-1)];}}setTimeout(()=>{showTyping();setTimeout(()=>{removeTyping();addMsg('bot',rep,bubbleClass);chatRound++;},1600);},300);}
+function sendMsg(){const inp=document.getElementById('chatIn'),txt=inp.value.trim();if(!txt)return;addMsg('me',txt);inp.value='';let rep,bubbleClass='';scene=inferSceneFromText(txt);if(chatMode==='companion'){rep=generateCompanionReply(txt);bubbleClass='human-bubble';}else{rep=chatRound===0?DOLPHINS[dolphinIdx].openers[scene]:generateDolphinReply(txt);}setTimeout(()=>{showTyping();setTimeout(()=>{removeTyping();addMsg('bot',rep,bubbleClass);chatRound++;},1600);},300);}
 function toDecision(){const sc=SCENARIOS[scene];document.getElementById('situTxt').textContent=sc.situ;buildChoices(sc);nav('s-decision');}
 function buildChoices(sc){const list=document.getElementById('choiceList');list.innerHTML='';document.getElementById('botComment').classList.remove('show');const d=DOLPHINS[dolphinIdx];sc.choices.forEach(c=>{const el=document.createElement('div');el.className='choice-item';el.onclick=()=>pickChoice(el,c);el.innerHTML=`<div class="choice-head"><div class="choice-letter">${c.l}</div><div class="choice-text">${c.t}</div>${c.rec?`<div class="rec-badge" style="background:${d.color}">推薦</div>`:''}</div><div class="choice-outcomes">${c.outs.map(o=>`<div class="out-row"><div class="out-label">${o.lb}</div><div class="bar-track"><div class="bar-fill ${o.cl}" data-p="${o.pct}"></div></div><div class="out-pct" style="color:var(${o.cl==='bar-g'?'--teal-mid':o.cl==='bar-a'?'--amber':'--coral'})">${o.pct}%</div></div>`).join('')}</div>`;list.appendChild(el);});}
 function pickChoice(el,c){const d=DOLPHINS[dolphinIdx];document.querySelectorAll('.choice-item').forEach(x=>{x.classList.remove('picked');x.querySelectorAll('.choice-letter').forEach(l=>{l.style.background='';l.style.color='';});});el.classList.add('picked');el.querySelectorAll('.choice-letter').forEach(l=>{l.style.background=d.color;l.style.color='white';});setTimeout(()=>{el.querySelectorAll('.bar-fill').forEach(b=>b.style.width=b.dataset.p+'%');},30);const bc=document.getElementById('botComment');bc.style.background=d.bg;document.getElementById('botCommentTxt').style.color=d.color;document.getElementById('botCommentTxt').textContent=c.tip;bc.classList.add('show');bc.scrollIntoView({behavior:'smooth',block:'nearest'});}

@@ -173,6 +173,35 @@
     .d-chat-name{font-size:15px;font-weight:700;}
     .d-chat-type{font-size:11px;color:var(--ink-faint);margin-top:1px;}
     .d-online{font-size:11px;color:var(--teal-mid);}
+    .virtual-dolphin-stage{padding:12px 20px 10px;background:linear-gradient(180deg,#eaf8fc 0%,#f7fcff 100%);border-bottom:1px solid rgba(26,24,20,.06);display:flex;align-items:center;gap:14px;flex-shrink:0;}
+    .virtual-dolphin{width:94px;height:70px;position:relative;flex-shrink:0;animation:dolphinFloat 3.2s ease-in-out infinite;filter:drop-shadow(0 8px 12px rgba(58,158,200,.18));}
+    .dolphin-body{position:absolute;left:17px;top:18px;width:58px;height:34px;border-radius:55% 50% 48% 52%;background:linear-gradient(145deg,#54b9d8,#247cae);transform:rotate(-7deg);}
+    .dolphin-belly{position:absolute;left:26px;top:33px;width:33px;height:12px;border-radius:50%;background:rgba(255,255,255,.62);transform:rotate(-8deg);}
+    .dolphin-nose{position:absolute;left:64px;top:28px;width:26px;height:12px;border-radius:0 18px 18px 0;background:linear-gradient(145deg,#54b9d8,#247cae);transform:rotate(-7deg);}
+    .dolphin-tail{position:absolute;left:4px;top:20px;width:28px;height:28px;}
+    .dolphin-tail:before,.dolphin-tail:after{content:"";position:absolute;width:18px;height:13px;background:#247cae;border-radius:80% 10% 80% 10%;left:3px;}
+    .dolphin-tail:before{top:0;transform:rotate(28deg);}
+    .dolphin-tail:after{top:12px;transform:rotate(-32deg);}
+    .dolphin-fin{position:absolute;left:40px;top:42px;width:19px;height:18px;background:#1b6f9c;border-radius:20px 4px 20px 8px;transform:rotate(26deg);}
+    .dolphin-top-fin{position:absolute;left:42px;top:9px;width:17px;height:18px;background:#2f95c2;border-radius:16px 4px 14px 4px;transform:rotate(-20deg);}
+    .dolphin-eye{position:absolute;left:63px;top:25px;width:5px;height:5px;background:#11334b;border-radius:50%;box-shadow:1px 0 0 rgba(255,255,255,.75);}
+    .dolphin-mouth{position:absolute;left:72px;top:36px;width:13px;height:3px;border-radius:0 0 12px 12px;background:#11334b;transform-origin:left center;transition:height .12s ease, top .12s ease;}
+    .dolphin-cheek{position:absolute;left:58px;top:34px;width:8px;height:5px;background:rgba(255,255,255,.28);border-radius:50%;}
+    .virtual-dolphin.speaking .dolphin-mouth{animation:mouthTalk .34s ease-in-out infinite;}
+    .virtual-dolphin.speaking .dolphin-body{animation:bodyTalk .68s ease-in-out infinite;}
+    .dolphin-status{min-width:0;display:flex;flex-direction:column;gap:5px;}
+    .dolphin-status strong{font-size:13px;color:var(--ink);}
+    .dolphin-status span{font-size:11px;color:var(--ink-faint);line-height:1.6;}
+    .sound-waves{display:flex;gap:3px;align-items:end;height:18px;}
+    .sound-waves i{width:4px;height:7px;border-radius:4px;background:var(--teal-mid);opacity:.35;}
+    .virtual-dolphin.speaking ~ .dolphin-status .sound-waves i{animation:waveTalk .7s ease-in-out infinite;}
+    .virtual-dolphin.speaking ~ .dolphin-status .sound-waves i:nth-child(2){animation-delay:.1s;}
+    .virtual-dolphin.speaking ~ .dolphin-status .sound-waves i:nth-child(3){animation-delay:.2s;}
+    .virtual-dolphin.speaking ~ .dolphin-status .sound-waves i:nth-child(4){animation-delay:.3s;}
+    @keyframes dolphinFloat{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-5px) rotate(1deg)}}
+    @keyframes mouthTalk{0%,100%{height:3px;top:36px}45%{height:9px;top:34px}}
+    @keyframes bodyTalk{0%,100%{transform:rotate(-7deg) scale(1)}50%{transform:rotate(-5deg) scale(1.025)}}
+    @keyframes waveTalk{0%,100%{height:6px;opacity:.35}50%{height:17px;opacity:1}}
     .chat-msgs{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:12px;}
     .msg{max-width:82%;animation:msgIn .3s ease;}
     .msg.bot{align-self:flex-start;} .msg.me{align-self:flex-end;}
@@ -482,6 +511,24 @@
   <div class="screen offRight" id="s-chat">
     <button class="btn-end-chat" onclick="endChat()">結束 ✕</button>
     <div class="dolphin-bar" id="chatHeader"></div>
+    <div class="virtual-dolphin-stage" aria-label="虛擬海豚陪伴角色">
+      <div class="virtual-dolphin" id="virtualDolphin" aria-hidden="true">
+        <div class="dolphin-tail"></div>
+        <div class="dolphin-top-fin"></div>
+        <div class="dolphin-body"></div>
+        <div class="dolphin-belly"></div>
+        <div class="dolphin-fin"></div>
+        <div class="dolphin-nose"></div>
+        <div class="dolphin-eye"></div>
+        <div class="dolphin-cheek"></div>
+        <div class="dolphin-mouth"></div>
+      </div>
+      <div class="dolphin-status">
+        <strong id="virtualDolphinName">海豚正在陪伴你</strong>
+        <span id="virtualDolphinStatus">我會聽你說，回覆時會跟著開口說話。</span>
+        <div class="sound-waves" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      </div>
+    </div>
     <div class="chat-msgs" id="chatMsgs"></div>
     <div class="chat-input-row">
       <input class="chat-input" id="chatIn" placeholder="說說你的感受..." onkeydown="if(event.key==='Enter')sendMsg()">
@@ -700,9 +747,12 @@ function makeDCard(d,i){const card=document.createElement('div');card.className=
 function pickRandom(){const card=document.getElementById('randCard'),emojis=['🎲','🐬','❓','🌀','✨'];let count=0;const iv=setInterval(()=>{document.getElementById('randEmoji').textContent=emojis[count%emojis.length];count++;if(count>=8){clearInterval(iv);const picked=Math.floor(Math.random()*DOLPHINS.length),d=DOLPHINS[picked];card.innerHTML=`<div style="display:flex;align-items:center;gap:14px;"><div style="font-size:32px;">🐬</div><div><div style="font-size:14px;font-weight:700;color:${d.color}">抽到了！${d.full}</div><div style="font-size:11px;color:var(--ink-faint);margin-top:2px;">${d.role}</div></div></div>`;card.style.borderColor=d.color;card.style.background=d.bg;setTimeout(()=>selectDolphin(picked),600);}},100);}
 function selectDolphin(i){dolphinIdx=i;chatMode='dolphin';document.querySelectorAll('.d-card').forEach((c,idx)=>{if(idx>=DOLPHINS.length)return;const d=DOLPHINS[idx];c.classList.toggle('selected',idx===i);c.style.borderColor=idx===i?d.color:'transparent';});setTimeout(()=>nav('s-chat'),220);}
 function startCompanionChat(idx){chatMode='companion';companionIdx=idx;nav('s-chat');}
-function initChat(){document.getElementById('chatMsgs').innerHTML='';chatRound=0;if(chatMode==='companion'){const c=COMPANIONS[companionIdx];document.getElementById('chatHeader').innerHTML=`<div class="d-ava" style="background:${c.avaBg}">${c.ava}</div><div style="flex:1;min-width:0;"><div class="d-chat-name" style="color:${c.color}">${c.name}</div><div class="d-chat-type" style="color:${c.color};opacity:.8">${c.bio}</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;margin-right:64px;"><div class="d-online">● 線上中</div><div class="companion-badge">🤝 認證陪伴者</div></div>`;setTimeout(()=>addMsg('bot',c.greeting,'human-bubble'),400);}else{const d=DOLPHINS[dolphinIdx];document.getElementById('chatHeader').innerHTML=`<div class="d-ava" style="background:${d.bg}">🐬</div><div style="flex:1;min-width:0;"><div class="d-chat-name" style="color:${d.color}">${d.name} <span style="font-size:11px;font-weight:400;color:var(--ink-faint)">${d.full}</span></div><div class="d-chat-type" style="color:${d.color};opacity:.7">${d.role}</div></div><div class="d-online" style="flex-shrink:0;margin-right:64px;">● 線上中</div>`;setTimeout(()=>addMsg('bot',d.greeting),400);}}
-function addMsg(role,text,extraClass=''){const box=document.getElementById('chatMsgs'),now=new Date();const t=`${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;const div=document.createElement('div');div.className=`msg ${role}`;div.innerHTML=`<div class="bubble ${extraClass}">${text}</div><div class="msg-time">${t}</div>`;box.appendChild(div);box.scrollTop=box.scrollHeight;}
-function showTyping(){const box=document.getElementById('chatMsgs'),div=document.createElement('div');div.id='typing';div.className='msg bot';div.innerHTML='<div class="typing"><span></span><span></span><span></span></div>';box.appendChild(div);box.scrollTop=box.scrollHeight;}
+function initChat(){document.getElementById('chatMsgs').innerHTML='';chatRound=0;updateVirtualDolphin(false);if(chatMode==='companion'){const c=COMPANIONS[companionIdx];document.getElementById('chatHeader').innerHTML=`<div class="d-ava" style="background:${c.avaBg}">${c.ava}</div><div style="flex:1;min-width:0;"><div class="d-chat-name" style="color:${c.color}">${c.name}</div><div class="d-chat-type" style="color:${c.color};opacity:.8">${c.bio}</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;margin-right:64px;"><div class="d-online">● 線上中</div><div class="companion-badge">🤝 認證陪伴者</div></div>`;setTimeout(()=>addMsg('bot',c.greeting,'human-bubble'),400);}else{const d=DOLPHINS[dolphinIdx];document.getElementById('chatHeader').innerHTML=`<div class="d-ava" style="background:${d.bg}">🐬</div><div style="flex:1;min-width:0;"><div class="d-chat-name" style="color:${d.color}">${d.name} <span style="font-size:11px;font-weight:400;color:var(--ink-faint)">${d.full}</span></div><div class="d-chat-type" style="color:${d.color};opacity:.7">${d.role}</div></div><div class="d-online" style="flex-shrink:0;margin-right:64px;">● 線上中</div>`;setTimeout(()=>addMsg('bot',d.greeting),400);}}
+let dolphinTalkTimer=null;
+function updateVirtualDolphin(speaking=false){const v=document.getElementById('virtualDolphin'),nameEl=document.getElementById('virtualDolphinName'),statusEl=document.getElementById('virtualDolphinStatus');if(!v)return;const d=DOLPHINS[dolphinIdx];v.classList.toggle('speaking',speaking);if(nameEl)nameEl.textContent=chatMode==='companion'?'海豚陪你一起聽':'與 '+d.name+' 一起聊天';if(statusEl)statusEl.textContent=speaking?'我正在回應你，嘴巴會跟著說話開闔。':'我在這裡陪你，慢慢說也可以。';}
+function setDolphinSpeaking(on,duration=0){clearTimeout(dolphinTalkTimer);updateVirtualDolphin(on);if(on&&duration)dolphinTalkTimer=setTimeout(()=>updateVirtualDolphin(false),duration);}
+function addMsg(role,text,extraClass=''){const box=document.getElementById('chatMsgs'),now=new Date();const t=`${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;const div=document.createElement('div');div.className=`msg ${role}`;div.innerHTML=`<div class="bubble ${extraClass}">${text}</div><div class="msg-time">${t}</div>`;box.appendChild(div);box.scrollTop=box.scrollHeight;if(role==='bot')setDolphinSpeaking(true,Math.min(3600,Math.max(1200,text.length*55)));}
+function showTyping(){setDolphinSpeaking(true);const box=document.getElementById('chatMsgs'),div=document.createElement('div');div.id='typing';div.className='msg bot';div.innerHTML='<div class="typing"><span></span><span></span><span></span></div>';box.appendChild(div);box.scrollTop=box.scrollHeight;}
 function removeTyping(){const el=document.getElementById('typing');if(el)el.remove();}
 function inferSceneFromText(txt){if(/作業|抄|作弊|功課|考試/.test(txt))return 1;if(/排擠|排除|群組|孤單|午餐|霸凌|不被需要|沒有人/.test(txt))return 2;if(/朋友|吵架|冷戰|誤會|道歉|和好|不說話/.test(txt))return 0;return scene;}
 function pickScene(idx){scene=idx;const chips=document.getElementById('sceneChips');if(chips)chips.style.display='none';addMsg('me',CHAT_SCENE_LABELS[idx]);const opener=chatMode==='companion'?COMPANIONS[companionIdx].replies[0][idx%2]:DOLPHINS[dolphinIdx].openers[idx];const bubbleClass=chatMode==='companion'?'human-bubble':'';setTimeout(()=>{showTyping();setTimeout(()=>{removeTyping();addMsg('bot',opener,bubbleClass);chatRound=1;},1800);},300);}

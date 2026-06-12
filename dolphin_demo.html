@@ -18,7 +18,7 @@
       --r:12px; --shadow:0 2px 16px rgba(26,24,20,0.08);
     }
     *{box-sizing:border-box;margin:0;padding:0;}
-    body{font-family:'Noto Sans TC',sans-serif;background:var(--paper);color:var(--ink);height:100vh;overflow:hidden;display:flex;flex-direction:column;}
+    body{font-family:'Noto Sans TC',sans-serif;background:var(--paper);color:var(--ink);height:100vh;height:100dvh;height:var(--app-height,100dvh);overflow:hidden;display:flex;flex-direction:column;}
 
     /* ── HEADER ── */
     .app-header{height:56px;background:rgba(250,248,244,0.96);backdrop-filter:blur(12px);border-bottom:1px solid rgba(26,24,20,0.1);display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0;z-index:10;}
@@ -36,7 +36,7 @@
     .btn-role.hidden{display:none;}
 
     /* ── SCREEN SYSTEM ── */
-    .screen-wrap{flex:1;overflow:hidden;position:relative;}
+    .screen-wrap{flex:1;min-height:0;overflow:hidden;position:relative;}
     .screen{position:absolute;inset:0;overflow-y:auto;padding:28px 22px 40px;transition:transform .38s cubic-bezier(.4,0,.2,1),opacity .38s;}
     .screen.active{transform:translateX(0);opacity:1;pointer-events:all;}
     .screen.offLeft{transform:translateX(-100%);opacity:0;pointer-events:none;}
@@ -170,7 +170,7 @@
     @keyframes spin{0%{transform:rotate(0deg) scale(1)}50%{transform:rotate(180deg) scale(1.3)}100%{transform:rotate(360deg) scale(1)}}
 
     /* ── CHAT ── */
-    #s-chat{padding:0;display:flex;flex-direction:column;overflow:hidden;}
+    #s-chat{padding:0;display:flex;flex-direction:column;overflow:hidden;min-height:0;height:100%;}
     .dolphin-bar{padding:14px 20px;display:flex;gap:12px;align-items:center;border-bottom:1px solid rgba(26,24,20,.08);flex-shrink:0;background:white;}
     .d-ava{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;}
     .d-chat-name{font-size:15px;font-weight:700;}
@@ -210,7 +210,7 @@
     @keyframes mouthTalk{0%,100%{height:3px;top:36px}45%{height:9px;top:34px}}
     @keyframes bodyTalk{0%,100%{transform:rotate(-7deg) scale(1)}50%{transform:rotate(-5deg) scale(1.025)}}
     @keyframes waveTalk{0%,100%{height:6px;opacity:.35}50%{height:17px;opacity:1}}
-    .chat-msgs{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:12px;}
+    .chat-msgs{flex:1;min-height:0;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:12px;}
     .msg{max-width:82%;animation:msgIn .3s ease;}
     .msg.bot{align-self:flex-start;} .msg.me{align-self:flex-end;}
     .bubble{padding:10px 14px;border-radius:18px;font-size:13px;line-height:1.75;}
@@ -240,7 +240,7 @@
     .farewell-sub{font-size:12px;color:var(--ink-faint);line-height:1.7;margin-bottom:24px;}
     .btn-farewell-home{width:100%;padding:13px;background:var(--teal);color:white;border:none;border-radius:50px;font-size:14px;font-weight:600;font-family:'Noto Sans TC',sans-serif;cursor:pointer;transition:all .2s;}
     .btn-farewell-home:hover{background:#2a7da8;}
-    .chat-input-row{padding:10px 20px 16px;display:flex;gap:10px;border-top:1px solid rgba(26,24,20,.08);flex-shrink:0;background:white;}
+    .chat-input-row{padding:10px 20px calc(16px + env(safe-area-inset-bottom,0px));display:flex;gap:10px;border-top:1px solid rgba(26,24,20,.08);flex-shrink:0;background:white;position:sticky;bottom:0;z-index:8;}
     .chat-input{flex:1;padding:10px 14px;border:1.5px solid rgba(26,24,20,.15);border-radius:24px;font-size:13px;font-family:'Noto Sans TC',sans-serif;background:white;outline:none;transition:border-color .2s;}
     .chat-input:focus{border-color:var(--teal);}
     .btn-send{width:40px;height:40px;border:none;background:var(--teal);color:white;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;}
@@ -250,6 +250,38 @@
     .btn-mic.rec{background:var(--coral-light);color:var(--coral);animation:pulse-rec 1s ease-in-out infinite;}
     @keyframes pulse-rec{0%,100%{box-shadow:0 0 0 0 rgba(208,112,106,.35)}50%{box-shadow:0 0 0 8px rgba(208,112,106,0)}}
     .chat-input.rec-active{border-color:var(--coral)!important;}
+
+    @media (max-width: 520px) {
+      .app-header{height:52px;padding:0 12px;gap:8px;}
+      .header-title{font-size:13px;}
+      .btn-role{height:28px;padding:0 9px;font-size:10px;}
+      .dolphin-bar{padding:10px 14px;gap:10px;}
+      .d-ava{width:38px;height:38px;font-size:19px;}
+      .d-chat-name{font-size:14px;}
+      .virtual-dolphin-stage{padding:8px 14px 7px;gap:10px;}
+      .virtual-dolphin{width:72px;height:54px;transform-origin:left center;}
+      .dolphin-body{left:13px;top:14px;width:46px;height:27px;}
+      .dolphin-belly{left:21px;top:26px;width:26px;height:10px;}
+      .dolphin-nose{left:51px;top:22px;width:21px;height:10px;}
+      .dolphin-tail{left:1px;top:15px;transform:scale(.82);transform-origin:left top;}
+      .dolphin-fin{left:32px;top:33px;width:15px;height:14px;}
+      .dolphin-top-fin{left:33px;top:7px;width:14px;height:15px;}
+      .dolphin-eye{left:50px;top:20px;}
+      .dolphin-mouth{left:57px;top:28px;width:11px;}
+      .dolphin-cheek{left:46px;top:27px;}
+      .dolphin-status{gap:3px;}
+      .dolphin-status strong{font-size:12px;}
+      .dolphin-status span{font-size:10px;line-height:1.45;}
+      .dolphin-tools{gap:6px;}
+      .btn-sound,.voice-tag{height:24px;font-size:10px;padding:0 8px;}
+      .chat-msgs{padding:12px 14px;gap:10px;}
+      .msg{max-width:88%;}
+      .bubble{font-size:13px;padding:9px 12px;line-height:1.65;}
+      .chat-input-row{padding:8px 12px calc(12px + env(safe-area-inset-bottom,0px));gap:8px;}
+      .chat-input{min-width:0;font-size:14px;padding:10px 13px;}
+      .btn-send,.btn-mic{width:40px;height:40px;}
+      .float-sim-btn{bottom:76px;right:12px;}
+    }
 
     /* ── DECISION ── */
     .situation-box{background:var(--amber-light);border-left:3px solid var(--amber);border-radius:var(--r);padding:14px 16px;margin-bottom:22px;font-size:13px;line-height:1.75;color:var(--ink-soft);}
@@ -629,6 +661,8 @@
 </div>
 
 <script>
+function setAppHeight(){const h=(window.visualViewport&&window.visualViewport.height)||window.innerHeight;document.documentElement.style.setProperty('--app-height',h+'px');}
+setAppHeight();window.addEventListener('resize',setAppHeight);if(window.visualViewport)window.visualViewport.addEventListener('resize',setAppHeight);
 const DOLPHINS=[{name:'小理',full:'理性海豚',role:'分析利弊得失',color:'#185fa5',bg:'#e6f1fb',tagBg:'#185fa5',tagColor:'white',greeting:'嗨，我是小理 🐬 分析問題是我的強項，讓我們把你的狀況拆解清楚。有什麼想聊的嗎？',openers:['三天沒說話，關係修復的黃金期正在縮短 📊 你們的友誼持續多久了？長期友誼主動溝通成功率更高。','先分析風險——「被發現的機率×懲罰嚴重度」跟「拒絕後失去友誼的機率×損失程度」，哪邊期望損失比較大？','先釐清根源：是單一事件引發？還是長期累積？找出原因，才能選對解決方案。'],replies:['我理解了。根據你描述的情況，有幾個關鍵變數需要考量——','好，關鍵資訊掌握了。讓我們用決策模擬來量化不同選擇的結果。']},{name:'小珊',full:'情緒海豚',role:'重視當下感受',color:'#7a2c14',bg:'#faece7',tagBg:'#993c1d',tagColor:'white',greeting:'嗨，我是小珊 🐬 你今天的感受對我最重要。不管發生什麼，我都在這裡陪著你 💙',openers:['三天沒說話......那種沉默讓我感到很難受 😢 你現在心裡最強烈的感覺是什麼？','夾在朋友和良心之間，這種感覺一定很沉重 😔 你現在最擔心的是哪一邊？','被排除在外的孤單，真的很痛 💔 你第一次感覺到被排擠是什麼時候？'],replies:['謝謝你告訴我這些 💙 我感受到你有多在意這件事......','你的感受是最重要的線索。讓我們一起用決策模擬，找到最能保護你情感的選擇。']},{name:'小勇',full:'勇氣海豚',role:'鼓勵冒險挑戰',color:'#7a4e0a',bg:'#faeeda',tagBg:'#ba7517',tagColor:'white',greeting:'嗨，我是小勇 🐬 遇到問題最重要的是行動力！跟我說說發生了什麼，我們一起突破它！🔥',openers:['三天了還在等——是時候主動出擊了！🔥 你在等什麼？你最怕哪種結果？','這種時候需要勇敢說出立場的力量！拒絕不是傷害，反而是最真誠的尊重。你怕的是什麼？','被排擠？讓他們看看你的實力！🌟 你有沒有想過主動去認識其他有趣的同學？'],replies:['對！你已經看清楚問題了，現在缺的只是跨出那一步——','你比想像的更有力量！來，用決策模擬看看哪個選擇最能讓你往前走。']},{name:'小安',full:'安全海豚',role:'降低決策風險',color:'#0a4d3a',bg:'#e1f5ee',tagBg:'#0f6e56',tagColor:'white',greeting:'嗨，我是小安 🐬 我會幫你把每個選擇的風險都想清楚，讓你做出最穩妥的決定。',openers:['三天沒說話，情緒可能還有波動。你確定自己現在的狀態，適合進行一次重要的對話嗎？','先冷靜評估風險：如果被發現，後果是什麼？你能承受嗎？再想想拒絕後最壞的情況。','在採取任何行動前，先確保自己情緒穩定。你現在有可以傾訴的人嗎——家人或信任的師長？'],replies:['我聽到了。在想怎麼做之前，先確認你現在是安全的、情緒是穩定的......','我們已經把主要風險梳理清楚了。讓我們用決策模擬，找出風險最低的選擇。']},{name:'小紫',full:'社交海豚',role:'人際關係優先',color:'#3b3282',bg:'#eeedfe',tagBg:'#534ab7',tagColor:'white',greeting:'嗨，我是小紫 🐬 人際關係是一切的核心！告訴我你和誰之間發生了什麼？我最擅長幫你想清楚關係的影響 💜',openers:['三天沒說話，共同朋友有沒有注意到？這件事有沒有開始影響你在班上的其他關係？','朋友向你求助說明他信任你。但這件事傳出去對你們兩個在班上的形象各有什麼影響？','被排擠通常跟某個關鍵人物有關。你覺得是誰在主導？搞好跟他的關係，情況會不會不同？'],replies:['我在幫你想這件事對整體關係網絡的影響......','人際關係很複雜，但我們可以找到最能維護你重要連結的做法。來用決策模擬看看。']}];
 const SCENARIOS=[{situ:'我跟好朋友因為一件誤解吵架了，已經三天沒說話。我很在乎這段友誼，但又不確定要不要先道歉。',choices:[{l:'A',t:'主動傳訊息道歉，解釋清楚誤會',rec:true,outs:[{lb:'關係修復',cl:'bar-g',pct:75},{lb:'尷尬收場',cl:'bar-a',pct:18},{lb:'更嚴重',cl:'bar-c',pct:7}],tip:'這個選擇需要勇氣，但主動溝通是最有效的方式。大多數情況下，真誠的道歉都能化解誤解。'},{l:'B',t:'等他先來找我，先冷靜幾天',rec:false,outs:[{lb:'自然和解',cl:'bar-g',pct:35},{lb:'繼續冷戰',cl:'bar-a',pct:45},{lb:'友誼破裂',cl:'bar-c',pct:20}],tip:'等待有時必要，但長時間冷戰可能讓誤解加深。若超過一週對方沒主動，建議你採取行動。'},{l:'C',t:'請共同朋友幫忙轉達調解',rec:false,outs:[{lb:'成功調解',cl:'bar-g',pct:55},{lb:'事情複雜化',cl:'bar-a',pct:30},{lb:'誤解更深',cl:'bar-c',pct:15}],tip:'第三方調解有一定效果，但也可能讓事情更複雜。如果直接溝通太難，這是個折衷方案。'}]},{situ:'好朋友說他沒時間做作業，求我把作業借他抄。我不想讓他失望，但又擔心被老師發現一起受罰。',choices:[{l:'A',t:'拒絕，但提議一起在下課前完成',rec:true,outs:[{lb:'維持信任',cl:'bar-g',pct:72},{lb:'朋友不開心',cl:'bar-a',pct:23},{lb:'關係受損',cl:'bar-c',pct:5}],tip:'最有智慧的選擇——你幫助了朋友，也保護了自己。真正的朋友會尊重你的邊界。'},{l:'B',t:'借他抄，這次就算了',rec:false,outs:[{lb:'暫時解決',cl:'bar-g',pct:40},{lb:'成為習慣',cl:'bar-a',pct:40},{lb:'一起被罰',cl:'bar-c',pct:20}],tip:'短期解決了問題，但這可能成為習慣，讓你持續面臨風險。你值得有自己的界限。'},{l:'C',t:'直接拒絕，說明自己也有壓力',rec:false,outs:[{lb:'朋友理解',cl:'bar-g',pct:50},{lb:'短暫不滿',cl:'bar-a',pct:38},{lb:'誤解你',cl:'bar-c',pct:12}],tip:'誠實說出自己的處境是勇敢的。大部分朋友都能理解；如果不理解，可能需要重新評估這段關係。'}]},{situ:'班上一群同學成立了群組，刻意把我排在外面。午餐時間也常常找不到人一起坐，感覺很孤單。',choices:[{l:'A',t:'主動接近其他同學，建立新的連結',rec:true,outs:[{lb:'找到新朋友',cl:'bar-g',pct:65},{lb:'慢慢融入',cl:'bar-a',pct:25},{lb:'再次碰壁',cl:'bar-c',pct:10}],tip:'把眼光放寬，班上可能有其他也在尋找朋友的人。不要讓一個圈子定義你的人際關係。'},{l:'B',t:'直接去問其中一個同學發生了什麼',rec:false,outs:[{lb:'誤會解開',cl:'bar-g',pct:45},{lb:'尷尬但平和',cl:'bar-a',pct:35},{lb:'衝突升高',cl:'bar-c',pct:20}],tip:'直接溝通需要很大勇氣，可能是最快解決問題的方式，但也要做好接受各種回應的心理準備。'},{l:'C',t:'告訴導師或輔導老師請求協助',rec:false,outs:[{lb:'得到支持',cl:'bar-g',pct:70},{lb:'同學知道',cl:'bar-a',pct:20},{lb:'情況複雜化',cl:'bar-c',pct:10}],tip:'向大人求助是你的權利，不是軟弱。輔導老師受過專業訓練，可以幫助你更有效地處理這個狀況。'}]}];
 const ISLANDS=[{emoji:'🌙',name:'深夜焦慮島',desc:'夜晚難以入睡，思緒紊亂',tag:'情緒海豚陪你',tagColor:'#993c1d',tagBg:'#faece7'},{emoji:'💼',name:'工作壓力島',desc:'職場壓力大，需要出口',tag:'理性海豚幫你分析',tagColor:'#7a4e0a',tagBg:'#faeeda'},{emoji:'⭐',name:'自我肯定島',desc:'想要找到自信與方向',tag:'勇氣海豚陪你前進',tagColor:'#0a4d3a',tagBg:'#e1f5ee'},{emoji:'🎨',name:'創意舒壓島',desc:'釋放壓力，重燃動力',tag:'社交海豚帶你玩',tagColor:'#3b3282',tagBg:'#eeedfe'},{emoji:'🤝',name:'社交焦慮島',desc:'人際關係讓你困擾',tag:'安全海豚穩住你',tagColor:'#185fa5',tagBg:'#e6f1fb'}];
